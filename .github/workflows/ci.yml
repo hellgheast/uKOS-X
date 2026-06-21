@@ -41,6 +41,30 @@ jobs:
 
       - name: Checkout
         uses: actions/checkout@v4
+      
+      - name: Build TinyUSB
+        run: |
+          export PATH_UKOS_X_PACKAGE="$GITHUB_WORKSPACE"
+          cd "$PATH_UKOS_X_PACKAGE/Third_Parties/TinyUSB"
+          zsh build.sh
+
+      - name: Build MicroPython
+        run: |
+          export PATH_UKOS_X_PACKAGE="$GITHUB_WORKSPACE"
+          cd "$PATH_UKOS_X_PACKAGE/Third_Parties/MicroPython"
+          zsh build.sh
+
+      - name: Build LVGL
+        run: |
+          export PATH_UKOS_X_PACKAGE="$GITHUB_WORKSPACE"
+          cd "$PATH_UKOS_X_PACKAGE/Third_Parties/LVGL"
+          zsh build.sh
+
+      - name: Build FatFs
+        run: |
+          export PATH_UKOS_X_PACKAGE="$GITHUB_WORKSPACE"
+          cd "$PATH_UKOS_X_PACKAGE/Third_Parties/FatFs"
+          zsh build.sh
 
       - name: Build firmware
         run: |
