@@ -34,6 +34,9 @@ jobs:
         username: ${{ github.actor }}
         password: ${{ secrets.GITHUB_TOKEN }}
     steps:
+      - name: Fix git safe directory
+        run: git config --global --add safe.directory '*'
+
       - name: Checkout
         uses: actions/checkout@v4
 
@@ -81,6 +84,9 @@ jobs:
       BOARD: Alastor_H743
       VARIANT: Variant_Test
     steps:
+      - name: Fix git safe directory
+        run: git config --global --add safe.directory '*'
+
       - name: Checkout
         uses: actions/checkout@v4
 
@@ -119,6 +125,9 @@ jobs:
         username: ${{ github.actor }}
         password: ${{ secrets.GITHUB_TOKEN }}
     steps:
+      - name: Fix git safe directory
+        run: git config --global --add safe.directory '*'
+
       - name: Checkout
         uses: actions/checkout@v4
 
@@ -131,8 +140,92 @@ jobs:
       - name: Build all targets
         run: |
           export PATH_UKOS_X_PACKAGE="$GITHUB_WORKSPACE"
-          export PATH="$PATH:$PATH_GCC_ARM/bin"
+          export PATH="$PATH:$PATH_GCC_ARM/bin:$PATH_GCC_RVXX/bin"
           cd "$PATH_UKOS_X_PACKAGE/Ports/Targets"
           ./build.sh -v
+
+      - name: Upload firmware artifacts (Alastor_H743)
+        uses: actions/upload-artifact@v4
+        with:
+          name: alastor-h743-all-firmware
+          path: Ports/Targets/Alastor_H743/Variant_Test/System/FLASH.*
+
+      - name: Upload firmware artifacts (Discovery_U5G9)
+        uses: actions/upload-artifact@v4
+        with:
+          name: discovery-u5g9-firmware
+          path: Ports/Targets/Discovery_U5G9/Variant_Test/System/FLASH.*
+
+      - name: Upload firmware artifacts (Nucleo_F207)
+        uses: actions/upload-artifact@v4
+        with:
+          name: nucleo-f207-firmware
+          path: Ports/Targets/Nucleo_F207/Variant_Test/System/FLASH.*
+
+      - name: Upload firmware artifacts (Nucleo_H743)
+        uses: actions/upload-artifact@v4
+        with:
+          name: nucleo-h743-firmware
+          path: Ports/Targets/Nucleo_H743/Variant_Test/System/FLASH.*
+
+      - name: Upload firmware artifacts (Nucleo_L4R5)
+        uses: actions/upload-artifact@v4
+        with:
+          name: nucleo-l4r5-firmware
+          path: Ports/Targets/Nucleo_L4R5/Variant_Test/System/FLASH.*
+
+      - name: Upload firmware artifacts (Nucleo_N657)
+        uses: actions/upload-artifact@v4
+        with:
+          name: nucleo-n657-firmware
+          path: Ports/Targets/Nucleo_N657/Variant_Test/System/FLASH.*
+
+      - name: Upload firmware artifacts (Longan_Nano_F103)
+        uses: actions/upload-artifact@v4
+        with:
+          name: longan-nano-f103-firmware
+          path: Ports/Targets/Longan_Nano_F103/Variant_Test/System/FLASH.*
+
+      - name: Upload firmware artifacts (Firefly_H743)
+        uses: actions/upload-artifact@v4
+        with:
+          name: firefly-h743-firmware
+          path: Ports/Targets/Firefly_H743/Variant_Test/System/FLASH.*
+
+      - name: Upload firmware artifacts (Asmodee_H747 CM4)
+        uses: actions/upload-artifact@v4
+        with:
+          name: asmodee-h747-cm4-firmware
+          path: Ports/Targets/Asmodee_H747/Variant_Test_CM4/System/FLASH.*
+
+      - name: Upload firmware artifacts (Asmodee_H747 CM7)
+        uses: actions/upload-artifact@v4
+        with:
+          name: asmodee-h747-cm7-firmware
+          path: Ports/Targets/Asmodee_H747/Variant_Test_CM7/System/FLASH.*
+
+      - name: Upload firmware artifacts (DevKit_nRF5340 Net)
+        uses: actions/upload-artifact@v4
+        with:
+          name: devkit-nrf5340-net-firmware
+          path: Ports/Targets/DevKit_nRF5340/Variant_Test_Net/System/FLASH.*
+
+      - name: Upload firmware artifacts (DevKit_nRF5340 App)
+        uses: actions/upload-artifact@v4
+        with:
+          name: devkit-nrf5340-app-firmware
+          path: Ports/Targets/DevKit_nRF5340/Variant_Test_App/System/FLASH.*
+
+      - name: Upload firmware artifacts (MAiXDUiNO_K210)
+        uses: actions/upload-artifact@v4
+        with:
+          name: maixduino-k210-firmware
+          path: Ports/Targets/MAiXDUiNO_K210/Variant_Test/System/FLASH.*
+
+      - name: Upload firmware artifacts (Pico2_rp2350)
+        uses: actions/upload-artifact@v4
+        with:
+          name: pico2-rp2350-firmware
+          path: Ports/Targets/Pico2_rp2350/Variant_Test/System/FLASH.*
 
 
