@@ -13,7 +13,6 @@ jobs:
   # Equivalent to build:alastor_743
   build-alastor-743:
     runs-on: ubuntu-latest
-    needs: build-image
     container:
       image: ghcr.io/hellgheast/ukosx_tools:latest
       credentials:
@@ -48,7 +47,6 @@ jobs:
   # Equivalent to build:build_all
   build-all:
     runs-on: ubuntu-latest
-    needs: build-image
     container:
       image: ghcr.io/${{ github.repository_owner }}/ukosx_tools:latest
       credentials:
