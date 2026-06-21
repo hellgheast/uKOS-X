@@ -1,0 +1,19 @@
+= Docker setup
+Mohammed Ismail Ben Salah
+:reproducible:
+
+This document provides all the guidelines to build a docker image for uKOS-X
+
+== How to build the docker image
+
+[source,bash]
+----
+docker buildx build -f Dockerfile . -t ukosx_tools
+----
+
+== How to run the docker image
+
+[source,bash]
+----
+docker run -it --mount type=bind,src=$(pwd)/uKOS-X,dst=/home/uKOS-X ukosx_tools
+----
