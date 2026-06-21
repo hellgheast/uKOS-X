@@ -1,6 +1,9 @@
 name: uKOS-X CI
 run-name: uKOS-X CI
 on: [push]
+permissions:
+  contents: read
+  packages: read
 env:
   # Equivalent to CI_PROJECT_DIR in GitLab — set per-job via $GITHUB_WORKSPACE
   # PATH_GCC_CORTEXM: path inside the Docker image (symlink created by Dockerfile)
