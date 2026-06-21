@@ -37,6 +37,14 @@ jobs:
       BOARD: Alastor_H743
       VARIANT: Variant_Test
     steps:
+    
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@v4
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
       - name: Checkout
         uses: actions/checkout@v4
 
