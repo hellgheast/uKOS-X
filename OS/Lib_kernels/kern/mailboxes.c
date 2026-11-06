@@ -1,10 +1,10 @@
 /*
 ; mailboxes.
 ; ==========
-
+;
 ; SPDX-License-Identifier: MIT
 ; SPDX-FileCopyrightText: 2025-2026 Edo. Franzi
-
+;
 ;------------------------------------------------------------------------
 ; Author:	Edo. Franzi		The 2025-01-01
 ; Modifs:
@@ -800,8 +800,6 @@ static	int32_t	local_readMailbox(uint32_t core, mbox_t *handle, void **message, 
 static	void	local_read(uint32_t core, mbox_t *handle, void **message, uint32_t *size, bool *preemption) {
 	uint32_t	nbMaxPacks, copySize;
 	proc_t		*process;
-
-	UNUSED(core);
 
 // Read the message
 

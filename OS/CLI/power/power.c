@@ -1,10 +1,10 @@
 /*
 ; power.
 ; ======
-
+;
 ; SPDX-License-Identifier: MIT
 ; SPDX-FileCopyrightText: 2025-2026 Edo. Franzi
-
+;
 ;------------------------------------------------------------------------
 ; Author:	Edo. Franzi		The 2025-01-01
 ; Modifs:
@@ -71,7 +71,7 @@ STRG_LOC_CONST(aStrHelp[])		  = "Give the battery information\n"
 
 									"Module built on "__DATE__"  "__TIME__" (c) EFr-2026\n\n";
 
-static	int32_t		prgm(uint32_t argc, const char_t *argv[]);
+static	int32_t		prgm([[maybe_unused]] uint32_t argc, [[maybe_unused]] const char_t *argv[]);
 
 MODULE(
 	Power,										// Module name (the first letter has to be upper case)
@@ -85,34 +85,41 @@ MODULE(
 	0											// Execution cores
 );
 
+// CLI tool specific
+// =================
+
+#define	KNB_READ_TRIES		10u					// Battery reads before giving up (a good one takes ~150 ms)
+
 /*
  * \brief Main entry point
  *
  */
-static	int32_t	prgm(uint32_t argc, const char_t *argv[]) {
+static	int32_t	prgm([[maybe_unused]] uint32_t argc, [[maybe_unused]] const char_t *argv[]) {
 			batteryInfo_t	batteryInfo;
 			int32_t			status;
 			uint16_t		i2cTries = 0;
 	static	uint16_t		maxI2cTries = 0;
 
-	UNUSED(argc);
-	UNUSED(argv);
-
 	(void)dprintf(KSYST, "Battery information.\n");
 
 	RESERVE(BATTERY, KMODE_READ_WRITE);
-	do { status = battery_read(&batteryInfo); i2cTries++; } while (status != KERR_BATTERY_NOERR);
+
+// A read can fail now and then, hence the retries - but a gauge that never
+// answers used to keep this loop, and the console, spinning forever, and
+// the "Battery manager problem!" report below was unreachable
+
+	do { status = battery_read(&batteryInfo); i2cTries++; } while ((status != KERR_BATTERY_NOERR) && (i2cTries < KNB_READ_TRIES));
 	RELEASE(BATTERY, KMODE_READ_WRITE);
 
 	maxI2cTries = (i2cTries > maxI2cTries) ? (i2cTries) : (maxI2cTries);
 
 	if (status != KERR_BATTERY_NOERR) { (void)dprintf(KSYST, "Battery manager problem!\n\n"); return (EXIT_OS_FAILURE); }
 
-	(void)dprintf(KSYST, "Battery voltage:       %7.2f [V]\n",		batteryInfo.oVoltage);
-	(void)dprintf(KSYST, "Battery current:       %7.2f [mA]\n",		batteryInfo.oCurrent);
-	(void)dprintf(KSYST, "Battery temperature:   %7.2f [K]\n",		batteryInfo.oTemperature);
-	(void)dprintf(KSYST, "Full charged capacity: %7.2f [mAh]\n",	batteryInfo.oFullChargedCapacity);
-	(void)dprintf(KSYST, "Remaining capacity:    %7.2f [mAh]\n",	batteryInfo.oRemainingCapacity);
+	(void)dprintf(KSYST, "Battery voltage:       %7.2f [V]\n",		batteryInfo.oVoltage_f);
+	(void)dprintf(KSYST, "Battery current:       %7.2f [mA]\n",		batteryInfo.oCurrent_f);
+	(void)dprintf(KSYST, "Battery temperature:   %7.2f [K]\n",		batteryInfo.oTemperature_f);
+	(void)dprintf(KSYST, "Full charged capacity: %7.2f [mAh]\n",	batteryInfo.oFullChargedCapacity_f);
+	(void)dprintf(KSYST, "Remaining capacity:    %7.2f [mAh]\n",	batteryInfo.oRemainingCapacity_f);
 
 	if (batteryInfo.oTimeToEmpty < 65535u) {
 		(void)dprintf(KSYST, "Time to empty:          %6d [m]\n",	batteryInfo.oTimeToEmpty);

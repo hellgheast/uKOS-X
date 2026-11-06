@@ -1,11 +1,11 @@
 #!/usr/bin/env zsh
-
+#
 # ukos_cppcheck.
 # ==============
-
+#
 # SPDX-License-Identifier: MIT
 # SPDX-FileCopyrightText: 2025-2026 Laurent von Allmen
-
+#
 #------------------------------------------------------------------------
 # Author:	Laurent von Allmen	The 2025-10-02
 # Modifs:	Edo. Franzi			The 2025-10-03, fix Ubuntu install
@@ -17,7 +17,7 @@
 #			./ukos_cppcheck.sh
 #
 #			OS:
-#			OSX 26.xx			yes
+#			OSX 27.xx			yes
 #			Ubuntu 26.04 LTS	yes
 #
 #   (c) 2025-2026, Laurent von Allmen

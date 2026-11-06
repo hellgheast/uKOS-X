@@ -1,10 +1,10 @@
 /*
 ; basic.
 ; ======
-
+;
 ; SPDX-License-Identifier: MIT
 ; SPDX-FileCopyrightText: 2025-2026 Edo. Franzi
-
+;
 ;------------------------------------------------------------------------
 ; Author:	Edo. Franzi		The 2025-01-01
 ; Modifs:
@@ -182,11 +182,9 @@ static	void	local_printStruct(mutx_t *mutex, strt_t data);
  *
  */
 [[noreturn]]
-static	void	aProcess_0(const void *argument) {
+static	void	aProcess_0([[maybe_unused]] const void *argument) {
 	int32_t		status;
 	mutx_t		*mutex;
-
-	UNUSED(argument);
 
 // Get the mutex handle
 
@@ -228,11 +226,9 @@ static	void	aProcess_0(const void *argument) {
  *
  */
 [[noreturn]]
-static	void	aProcess_1(const void *argument) {
+static	void	aProcess_1([[maybe_unused]] const void *argument) {
 	int32_t		status;
 	mutx_t		*mutex;
-
-	UNUSED(argument);
 
 // Get the mutex handle
 
@@ -274,11 +270,9 @@ static	void	aProcess_1(const void *argument) {
  *
  */
 [[noreturn]]
-static	void	aProcess_2(const void *argument) {
+static	void	aProcess_2([[maybe_unused]] const void *argument) {
 	int32_t		status;
 	mutx_t		*mutex;
-
-	UNUSED(argument);
 
 // Get the mutex handle
 
@@ -375,9 +369,6 @@ MAIN_ENTRY(argc, argv[]) {
 	STRG_LOC_CONST(aStrText_1[]) = "Process user 1.                           (c) EFr-2026";
 	STRG_LOC_CONST(aStrText_2[]) = "Process user 2.                           (c) EFr-2026";
 
-	UNUSED(argc);
-	UNUSED(argv);
-
 // Specifications for the processes
 
 	PROCESS_STACKMALLOC(
@@ -413,7 +404,7 @@ MAIN_ENTRY(argc, argv[]) {
 		KKERN_PRIORITY_HIGH_01				// KKERN_PRIORITY_HIGH < Priority < KKERN_PRIORITY_LOW_14. KKERN_PRIORITY_LOW_15 is reserved for the idle process
 	);
 
-	if (kern_createMutex("Critical", &mutex)				   != KERR_KERN_NOERR) { LOG(KFATAL_USER, "Create mutx"); return (EXIT_OS_FAILURE); }
+	if (kern_createMutex("Critical", &mutex)					  != KERR_KERN_NOERR) { LOG(KFATAL_USER, "Create mutx"); return (EXIT_OS_FAILURE); }
 	if (kern_createProcess(&specification_0, nullptr, &process_0) != KERR_KERN_NOERR) { LOG(KFATAL_USER, "Create proc"); return (EXIT_OS_FAILURE); }
 	if (kern_createProcess(&specification_1, nullptr, &process_1) != KERR_KERN_NOERR) { LOG(KFATAL_USER, "Create proc"); return (EXIT_OS_FAILURE); }
 	if (kern_createProcess(&specification_2, nullptr, &process_2) != KERR_KERN_NOERR) { LOG(KFATAL_USER, "Create proc"); return (EXIT_OS_FAILURE); }

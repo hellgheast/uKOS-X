@@ -1,9 +1,9 @@
 # makefile.
 # =========
-
+#
 # SPDX-License-Identifier: MIT
 # SPDX-FileCopyrightText: 2025-2026 Edo. Franzi
-
+#
 #------------------------------------------------------------------------
 # Author:	Edo. Franzi		The 2025-01-01
 # Modifs:
@@ -60,9 +60,9 @@ OPTIMISATION	=  -Os
 
 CXXFLAGS		+= -DTF_LITE_STATIC_MEMORY=1 -DRISCV
 
-MYLIB			=    $(PATH_UKOS)/Third_Parties/Tflite-micro/Library/$(CORE)/libTFLite.a
-PATH_INCLUDES	+= -I$(PATH_UKOS)/Third_Parties/Tflite-micro/Library/Generic/RISCV64_generic
-PATH_INCLUDES	+= -I$(PATH_UKOS)/Third_Parties/Tflite-micro/Library/Generic/RISCV64_generic/third_party/flatbuffers/include
-PATH_INCLUDES	+= -I$(PATH_UKOS)/Third_Parties/Tflite-micro/Library/Generic/RISCV64_generic/third_party/gemmlowp
+MYLIB			=			$(PATH_UKOS)/Third_Parties/Tflite-micro/Library/$(CORE)/libTFLite.a
+PATH_INCLUDES	+= -isystem $(PATH_UKOS)/Third_Parties/Tflite-micro/Library/Generic/RISCV64_generic
+PATH_INCLUDES	+= -isystem $(PATH_UKOS)/Third_Parties/Tflite-micro/Library/Generic/RISCV64_generic/third_party/flatbuffers/include
+PATH_INCLUDES	+= -isystem $(PATH_UKOS)/Third_Parties/Tflite-micro/Library/Generic/RISCV64_generic/third_party/gemmlowp
 
 include ../../../../Mkfiles/common.mk

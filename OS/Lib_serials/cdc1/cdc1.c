@@ -1,10 +1,10 @@
 /*
 ; cdc1.
 ; =====
-
+;
 ; SPDX-License-Identifier: MIT
 ; SPDX-FileCopyrightText: 2025-2026 Edo. Franzi
-
+;
 ;------------------------------------------------------------------------
 ; Author:	Edo. Franzi		The 2025-01-01
 ; Modifs:
@@ -48,9 +48,6 @@
 */
 
 #include	"uKOS.h"
-
-// cppcheck-suppress missingInclude
-//
 #include	"tusb_config.h"
 
 #if (defined(CONFIG_MAN_CDC1_S))
@@ -83,16 +80,20 @@ MODULE(
 // Library specific
 // ================
 
+#define	CDC1_SEMA_RX_S
 #define	CDC1_SEMA_TX_S
 
 #define	KCDC1_SZ_TX_BUF		CFG_TUD_CDC_TX_BUFSIZE
 #define	KCDC1_SZ_RX_BUF		CFG_TUD_CDC_RX_BUFSIZE
 #define	KPORT1				1
 
+STRG_LOC_CONST(aStrSemaphore_RX[]) = KCDC1_SEMAPHORE_RX;
 STRG_LOC_CONST(aStrSemaphore_TX[]) = KCDC1_SEMAPHORE_TX;
 
+static	bool		vWithSemaphore_RX[KNB_CORES] = MCSET(false);
 static	bool		vWithSemaphore_TX[KNB_CORES] = MCSET(false);
 
+static	sema_t		*vSemaphore_RX[KNB_CORES];
 static	sema_t		*vSemaphore_TX[KNB_CORES];
 static	mutx_t		*vMutex_Reserve_RX[KNB_CORES];
 static	mutx_t		*vMutex_Reserve_TX[KNB_CORES];
@@ -102,6 +103,7 @@ static	mutx_t		*vMutex_Reserve_TX[KNB_CORES];
 		void		TinyUSB_cdc_init(void);
 		void		TinyUSB_cdc_write(uint8_t itf, const uint8_t *buffer, uint32_t size);
 		void		TinyUSB_cdc_read(uint8_t itf, uint8_t *buffer, uint32_t *size);
+		bool		TinyUSB_cdc_isConnected(uint8_t itf);
 static	int32_t		local_init(void);
 static	int32_t		local_configure(const cdcxCnf_t *configure);
 static	int32_t		local_write(const uint8_t *buffer, uint32_t size);
@@ -427,6 +429,34 @@ int32_t	cdc1_flush(void) {
 	return (status);
 }
 
+/*
+ * \brief Is the cdc1 connected
+ *
+ * Call example in C:
+ *
+ * \code{.c}
+ * int32_t    status;
+ *
+ *    status = cdc1_isConnected();
+ * \endcode
+ *
+ * \return		KERR_SERIAL_NOERR	OK
+ * \return		KERR_SERIAL_NOTCO	The device is not connected
+ * \return		KERR_SERIAL_GEERR	General error
+ *
+ */
+int32_t	cdc1_isConnected(void) {
+	int32_t		status;
+
+	PRIVILEGE_ELEVATE;
+	status = local_init();
+	if (status != KERR_SERIAL_NOERR) { PRIVILEGE_RESTORE; return (status); }
+
+	status = (TinyUSB_cdc_isConnected(1u) == true) ? (KERR_SERIAL_NOERR) : (KERR_SERIAL_NOTCO);
+	PRIVILEGE_RESTORE;
+	return (status);
+}
+
 // Local routines
 // ==============
 
@@ -452,6 +482,7 @@ static	int32_t	local_init(void) {
 
 		if (kern_createMutex(KCDC1_MUTEX_RESERVE_RX, &vMutex_Reserve_RX[core]) != KERR_KERN_NOERR) { LOG(KFATAL_MANAGER, "cdc1: create mutx"); exit(EXIT_OS_PANIC); }
 		if (kern_createMutex(KCDC1_MUTEX_RESERVE_TX, &vMutex_Reserve_TX[core]) != KERR_KERN_NOERR) { LOG(KFATAL_MANAGER, "cdc1: create mutx"); exit(EXIT_OS_PANIC); }
+		if (kern_createSemaphore(aStrSemaphore_RX, 0, 1, &vSemaphore_RX[core]) != KERR_KERN_NOERR) { LOG(KFATAL_MANAGER, "cdc1: Create sema"); exit(EXIT_OS_PANIC); }
 		if (kern_createSemaphore(aStrSemaphore_TX, 0, 1, &vSemaphore_TX[core]) != KERR_KERN_NOERR) { LOG(KFATAL_MANAGER, "cdc1: Create sema"); exit(EXIT_OS_PANIC); }
 	}
 	RETURN_INT_RESTORE(status);
@@ -469,7 +500,8 @@ static	int32_t	local_configure(const cdcxCnf_t *configure) {
 	core = GET_RUNNING_CORE;
 
 	INTERRUPTION_OFF;
-	vWithSemaphore_TX[core] = ((configure->oKernSync & ((uint32_t)1u<<(uint32_t)BSERIAL_SEMAPHORE_TX)) != 0u) ? (true) : (false);
+	vWithSemaphore_RX[core] = ((configure->oKernSync & (uint8_t)(1u<<BSERIAL_SEMAPHORE_RX)) != 0u) ? (true) : (false);
+	vWithSemaphore_TX[core] = ((configure->oKernSync & (uint8_t)(1u<<BSERIAL_SEMAPHORE_TX)) != 0u) ? (true) : (false);
 	RETURN_INT_RESTORE(KERR_SERIAL_NOERR);
 }
 
@@ -552,9 +584,14 @@ static	int32_t	local_flush(void) {
 	uint8_t		i, buffer[32];
 	uint32_t	size;
 
-	INTERRUPTION_OFF;
-	for (i = 0u; i < (512u / 32u); i++) { TinyUSB_cdc_read(KPORT1, &buffer[0], &size); }
-	RETURN_INT_RESTORE(KERR_SERIAL_NOERR);
+	for (i = 0u; i < (512u / 32u); i++) {
+		size = sizeof(buffer);
+		TinyUSB_cdc_read(KPORT1, buffer, &size);
+		if (size == 0u) {
+			break;
+		}
+	}
+	return (KERR_SERIAL_NOERR);
 }
 
 #endif

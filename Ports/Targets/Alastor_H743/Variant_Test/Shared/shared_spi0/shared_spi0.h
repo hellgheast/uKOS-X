@@ -1,10 +1,10 @@
 /*
 ; shared_spi0.
 ; ============
-
+;
 ; SPDX-License-Identifier: MIT
 ; SPDX-FileCopyrightText: 2025-2026 Edo. Franzi
-
+;
 ;------------------------------------------------------------------------
 ; Author:	Edo. Franzi		The 2025-01-01
 ; Modifs:
@@ -58,7 +58,7 @@ enum {
 		KIMUA,									// Accelerometer imu manager
 		KIMUM,									// Magnetometer imu manager
 		KTEMPERATURE,							// Temperature temperature manager
-		KFLASH									// flash manager
+		KMEMORY									// flash memory manager
 };
 
 // Peripheral macro

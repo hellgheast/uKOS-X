@@ -1,11 +1,11 @@
 /*
 ; init.
 ; =====
-
+;
 ; SPDX-License-Identifier: MIT
 ; SPDX-FileCopyrightText: 2025-2026 Edo. Franzi
 ; SPDX-FileCopyrightText: 2025-2026 Laurent von Allmen
-
+;
 ;------------------------------------------------------------------------
 ; Author:	Edo. Franzi		The 2025-01-01
 ; Modifs:
@@ -59,6 +59,9 @@
 
 #include	"init.h"
 #include	"memo/private/private_memo.h"
+#ifdef PRIVILEGED_USER_S
+#include	"Registers/pmp.h"	// SET_PMP_REGION – static PMP partition
+#endif
 
 // RISC-V specific runtime
 // =======================
@@ -74,6 +77,9 @@ static	void		local_emptyRxFifo(void);
 static	void		local_writeRTxFifo(uint32_t data);
 static	uint32_t	local_readRxFifo(void);
 static	void		init_C0_init(void);
+#ifdef PRIVILEGED_USER_S
+static	void		local_PMP_Configuration(void);
+#endif
 
 extern	void		first_handle_trap(void);
 extern	void		Reset_C1_Handler(void);
@@ -93,6 +99,10 @@ void	init_init(void) {
 
 	local_PLL_Configuration();
 	init_C0_init();
+
+#ifdef PRIVILEGED_USER_S
+	local_PMP_Configuration();		// core 0 PMP (per-hart)
+#endif
 
 	if (GET_RUNNING_CORE == KCORE_0) {
 		local_USB_Configuration();
@@ -121,6 +131,30 @@ void	init_relocate(void) {
 	}
 }
 
+#ifdef PRIVILEGED_USER_S
+/*
+ * \brief local_PMP_Configuration
+ *
+ * - Program the per-hart static PMP partition, mirroring the ARM MPU table.
+ * - U-grant list: kernel RAM (0x20000000..0x2001FFFF) gets no region and is therefore
+ *	 inaccessible to U-mode; the user RAM domain (3 NAPOT regions) and flash are granted.
+ * - Peripherals stay U-accessible via Hazard3's hardwired PMP regions.
+ * - Rules are unlocked, so M-mode bypasses them: with processes still in M-mode
+ *	 this has no runtime effect; it takes hold when processes drop to U-mode.
+ *
+ * \note This function does not return a value (None).
+ *
+ */
+static	void	local_PMP_Configuration(void) {
+
+	SET_PMP_DISABLE_ALL();
+	SET_PMP_REGION(0, ST_USER_RAM_0,  17, KPMP_RWX_ALL);	// 0x20020000 128K: stacks, data_u, heap
+	SET_PMP_REGION(1, ST_USER_RAM_1,  18, KPMP_RWX_ALL);	// 0x20040000 256K: heap, user memory, shared
+	SET_PMP_REGION(2, ST_USER_RAM_2,  13, KPMP_RWX_ALL);	// 0x20080000	8K: shared (tail)
+	SET_PMP_REGION(3, ST_FLASH_INT_0, 22, KPMP_RX_ALL);		// 0x10000000	4M: code + rodata
+}
+#endif
+
 /*
  * \brief local_PLL_Configuration
  *
@@ -136,6 +170,8 @@ static	void	local_PLL_Configuration(void) {
 #define PLL_USB_CS_LOCK				PLL_SYS_CS_LOCK
 #define PLL_USB_PRIM_POSTDIV1_0		PLL_SYS_PRIM_POSTDIV1_0
 #define PLL_USB_PRIM_POSTDIV2_0		PLL_SYS_PRIM_POSTDIV2_0
+#define PLL_USB_CS_REFDIV_0			PLL_SYS_CS_REFDIV_0
+#define PLL_USB_FBDIV_INT_FBDIV_INT_0	PLL_SYS_FBDIV_INT_FBDIV_INT_0
 
 // Disable clock resuscitation (may have been enabled by bootrom)
 
@@ -173,19 +209,25 @@ static	void	local_PLL_Configuration(void) {
 
 	REG(PLL_SYS)->PWR |= (PLL_SYS_PWR_PD | PLL_SYS_PWR_VCOPD | PLL_SYS_PWR_POSTDIVPD);
 
-// Configure PLL_SYS for 150 MHz
-// VCO = 1500 MHz, REFDIV = 1, FBDIV = 125 (12 * 125 = 1500)
-// postdiv1 = 5, postdiv2 = 2 => 1500 / (5 * 2) = 150 MHz
+// Configure PLL_SYS for 150-MHz
+// FVCO min..max, 750-MHz..1600-MHz
+// For f(ck in) = 12-MHz (XOSC)
+// f(ref) = f(ck in) / REFDIV					REFDIV = 1					---> f(ref) = 12-MHz
+// f(vco) = f(ref) * FBDIV						FBDIV = 125					---> f(vco) = 1500-MHz
+// f(out) = f(vco) / (POSTDIV1 * POSTDIV2)		POSTDIV1 = 5, POSTDIV2 = 2	---> f(out) = 150-MHz
 
-	REG(PLL_SYS)->CS		= 0x1u;
-	REG(PLL_SYS)->FBDIV_INT = 125u;
+	KPLL_STATIC_CHECKS(SYS, KCFG_PLLSYS_REFDIV, KCFG_PLLSYS_FBDIV, KCFG_PLLSYS_POSTDIV1, KCFG_PLLSYS_POSTDIV2);
+	KPLL_STATIC_CHECK_FVCO(SYS, KCFG_PLLSYS_REFDIV, KCFG_PLLSYS_FBDIV);
+
+	REG(PLL_SYS)->CS		= (KCFG_PLLSYS_REFDIV * PLL_SYS_CS_REFDIV_0);
+	REG(PLL_SYS)->FBDIV_INT = (KCFG_PLLSYS_FBDIV * PLL_SYS_FBDIV_INT_FBDIV_INT_0);
 
 // Turn on the VCO
 
 	REG(PLL_SYS)->PWR &= ~(PLL_SYS_PWR_PD | PLL_SYS_PWR_VCOPD);
 	while ((REG(PLL_SYS)->CS & PLL_SYS_CS_LOCK) == 0u) { }
 
-	REG(PLL_SYS)->PRIM = (5u * PLL_SYS_PRIM_POSTDIV1_0) | (2u * PLL_SYS_PRIM_POSTDIV2_0);
+	REG(PLL_SYS)->PRIM = (KCFG_PLLSYS_POSTDIV1 * PLL_SYS_PRIM_POSTDIV1_0) | (KCFG_PLLSYS_POSTDIV2 * PLL_SYS_PRIM_POSTDIV2_0);
 	REG(PLL_SYS)->PWR &= ~PLL_SYS_PWR_POSTDIVPD;
 
 // Switch clk_sys to PLL_SYS (glitchless via SRC/AUXSRC)
@@ -212,18 +254,25 @@ static	void	local_PLL_Configuration(void) {
 	REG(PLL_USB)->PWR |= (PLL_USB_PWR_PD | PLL_USB_PWR_VCOPD | PLL_USB_PWR_POSTDIVPD);
 
 // Configure PLL_USB for 48-MHz
-// - VCO = 480-MHz, REFDIV = 1, FBDIV = 40 (12 * 40 = 480)
-// - postdiv1 = 5, postdiv2 = 2	 => 480 / (5 * 2) = 48-MHz
+// FVCO min..max, 750-MHz..1600-MHz
+// For f(ck in) = 12-MHz (XOSC)
+// f(ref) = f(ck in) / REFDIV					REFDIV = 1					---> f(ref) = 12-MHz
+// f(vco) = f(ref) * FBDIV						FBDIV = 40					---> f(vco) = 480-MHz
+// f(out) = f(vco) / (POSTDIV1 * POSTDIV2)		POSTDIV1 = 5, POSTDIV2 = 2	---> f(out) = 48-MHz
+//
+// !!! f(vco) = 480-MHz is below FVCO min, so KPLL_STATIC_CHECK_FVCO is not applied here
 
-	REG(PLL_USB)->CS		= 0x1u;
-	REG(PLL_USB)->FBDIV_INT = 40u;
+	KPLL_STATIC_CHECKS(USB, KCFG_PLLUSB_REFDIV, KCFG_PLLUSB_FBDIV, KCFG_PLLUSB_POSTDIV1, KCFG_PLLUSB_POSTDIV2);
+
+	REG(PLL_USB)->CS		= (KCFG_PLLUSB_REFDIV * PLL_USB_CS_REFDIV_0);
+	REG(PLL_USB)->FBDIV_INT = (KCFG_PLLUSB_FBDIV * PLL_USB_FBDIV_INT_FBDIV_INT_0);
 
 // Turn on the VCO
 
 	REG(PLL_USB)->PWR &= ~(PLL_USB_PWR_PD | PLL_USB_PWR_VCOPD);
 	while ((REG(PLL_USB)->CS & PLL_USB_CS_LOCK) == 0u) { }
 
-	REG(PLL_USB)->PRIM = (5u * PLL_USB_PRIM_POSTDIV1_0) | (2u * PLL_USB_PRIM_POSTDIV2_0);
+	REG(PLL_USB)->PRIM = (KCFG_PLLUSB_POSTDIV1 * PLL_USB_PRIM_POSTDIV1_0) | (KCFG_PLLUSB_POSTDIV2 * PLL_USB_PRIM_POSTDIV2_0);
 	REG(PLL_USB)->PWR &= ~PLL_USB_PWR_POSTDIVPD;
 
 // Switch the clk_usb on the PLL_USB (via SRC/AUXSRC)
@@ -420,6 +469,10 @@ static	void	init_C1_init(void) {
 		__asm volatile ("nop");
 	}
 	__asm volatile ("fence r,r" ::: "memory");
+
+#ifdef PRIVILEGED_USER_S
+	local_PMP_Configuration();		// core 1 PMP (per-hart)
+#endif
 
 	INTERRUPTION_ON_HARD;
 }
@@ -637,6 +690,8 @@ static	void	local_PLL_Configuration(void) {
 #define	PLL_USB_CS_LOCK				PLL_SYS_CS_LOCK
 #define	PLL_USB_PRIM_POSTDIV1_0		PLL_SYS_PRIM_POSTDIV1_0
 #define	PLL_USB_PRIM_POSTDIV2_0		PLL_SYS_PRIM_POSTDIV2_0
+#define	PLL_USB_CS_REFDIV_0			PLL_SYS_CS_REFDIV_0
+#define	PLL_USB_FBDIV_INT_FBDIV_INT_0	PLL_SYS_FBDIV_INT_FBDIV_INT_0
 
 // The quartz oscillator
 // ---------------------
@@ -666,19 +721,25 @@ static	void	local_PLL_Configuration(void) {
 
 	REG(PLL_SYS)->PWR |= (PLL_SYS_PWR_PD | PLL_SYS_PWR_VCOPD | PLL_SYS_PWR_POSTDIVPD);
 
-// Configurer PLL_SYS for 150-MHz
-// - VCO = 1500-MHz, REFDIV = 1, FBDIV = 125 (12 * 125 = 1500)
-// - postdiv1 = 5, postdiv2 = 2  => 1500 / (5 * 2) = 150-MHz
+// Configure PLL_SYS for 150-MHz
+// FVCO min..max, 750-MHz..1600-MHz
+// For f(ck in) = 12-MHz (XOSC)
+// f(ref) = f(ck in) / REFDIV					REFDIV = 1					---> f(ref) = 12-MHz
+// f(vco) = f(ref) * FBDIV						FBDIV = 125					---> f(vco) = 1500-MHz
+// f(out) = f(vco) / (POSTDIV1 * POSTDIV2)		POSTDIV1 = 5, POSTDIV2 = 2	---> f(out) = 150-MHz
 
-	REG(PLL_SYS)->CS		= 0x1u;
-	REG(PLL_SYS)->FBDIV_INT = 125u;
+	KPLL_STATIC_CHECKS(SYS, KCFG_PLLSYS_REFDIV, KCFG_PLLSYS_FBDIV, KCFG_PLLSYS_POSTDIV1, KCFG_PLLSYS_POSTDIV2);
+	KPLL_STATIC_CHECK_FVCO(SYS, KCFG_PLLSYS_REFDIV, KCFG_PLLSYS_FBDIV);
+
+	REG(PLL_SYS)->CS		= (KCFG_PLLSYS_REFDIV * PLL_SYS_CS_REFDIV_0);
+	REG(PLL_SYS)->FBDIV_INT = (KCFG_PLLSYS_FBDIV * PLL_SYS_FBDIV_INT_FBDIV_INT_0);
 
 // Turn on the VCO
 
 	REG(PLL_SYS)->PWR &= ~(PLL_SYS_PWR_PD | PLL_SYS_PWR_VCOPD);
 	while ((REG(PLL_SYS)->CS & PLL_SYS_CS_LOCK) == 0u) { ; }
 
-	REG(PLL_SYS)->PRIM = (5u * PLL_SYS_PRIM_POSTDIV1_0) | (2u * PLL_SYS_PRIM_POSTDIV2_0);
+	REG(PLL_SYS)->PRIM = (KCFG_PLLSYS_POSTDIV1 * PLL_SYS_PRIM_POSTDIV1_0) | (KCFG_PLLSYS_POSTDIV2 * PLL_SYS_PRIM_POSTDIV2_0);
 	REG(PLL_SYS)->PWR &= ~PLL_SYS_PWR_POSTDIVPD;
 
 // Switch the clk_sys on the PLL_SYS (glitchless via SRC/AUXSRC)
@@ -705,19 +766,26 @@ static	void	local_PLL_Configuration(void) {
 
 	REG(PLL_USB)->PWR |= (PLL_USB_PWR_PD | PLL_USB_PWR_VCOPD | PLL_USB_PWR_POSTDIVPD);
 
-// Configurer PLL_USB for 48-MHz
-// - VCO = 480-MHz, REFDIV = 1, FBDIV = 40 (12 * 40 = 480)
-// - postdiv1 = 5, postdiv2 = 2  => 480 / (5 * 2) = 48-MHz
+// Configure PLL_USB for 48-MHz
+// FVCO min..max, 750-MHz..1600-MHz
+// For f(ck in) = 12-MHz (XOSC)
+// f(ref) = f(ck in) / REFDIV					REFDIV = 1					---> f(ref) = 12-MHz
+// f(vco) = f(ref) * FBDIV						FBDIV = 40					---> f(vco) = 480-MHz
+// f(out) = f(vco) / (POSTDIV1 * POSTDIV2)		POSTDIV1 = 5, POSTDIV2 = 2	---> f(out) = 48-MHz
+//
+// !!! f(vco) = 480-MHz is below FVCO min, so KPLL_STATIC_CHECK_FVCO is not applied here
 
-	REG(PLL_USB)->CS		= 0x1u;
-	REG(PLL_USB)->FBDIV_INT = 40u;
+	KPLL_STATIC_CHECKS(USB, KCFG_PLLUSB_REFDIV, KCFG_PLLUSB_FBDIV, KCFG_PLLUSB_POSTDIV1, KCFG_PLLUSB_POSTDIV2);
+
+	REG(PLL_USB)->CS		= (KCFG_PLLUSB_REFDIV * PLL_USB_CS_REFDIV_0);
+	REG(PLL_USB)->FBDIV_INT = (KCFG_PLLUSB_FBDIV * PLL_USB_FBDIV_INT_FBDIV_INT_0);
 
 // Turn on the VCO
 
 	REG(PLL_USB)->PWR &= ~(PLL_USB_PWR_PD | PLL_USB_PWR_VCOPD);
 	while ((REG(PLL_USB)->CS & PLL_USB_CS_LOCK) == 0u) { ; }
 
-	REG(PLL_USB)->PRIM = (5u * PLL_USB_PRIM_POSTDIV1_0) | (2u * PLL_USB_PRIM_POSTDIV2_0);
+	REG(PLL_USB)->PRIM = (KCFG_PLLUSB_POSTDIV1 * PLL_USB_PRIM_POSTDIV1_0) | (KCFG_PLLUSB_POSTDIV2 * PLL_USB_PRIM_POSTDIV2_0);
 	REG(PLL_USB)->PWR &= ~PLL_USB_PWR_POSTDIVPD;
 
 // Switch the clk_usb on the PLL_USB (via SRC/AUXSRC)
@@ -784,15 +852,15 @@ static	void	local_launchCore_1(entryAddr_t entry) {
 	const	uint32_t	vtor   = (uint32_t)g_pfnVectors_C1;
 	const	uint32_t	sp	   = (uint32_t)(uintptr_t)linker_topStackFirst_C1;
 	const	uint32_t	pc	   = ((uint32_t)(uintptr_t)entry) | 1u;
-    const	uint32_t	seq[6] = { 0u, 0u, 1u, vtor, sp, pc };
+	const	uint32_t	seq[6] = { 0u, 0u, 1u, vtor, sp, pc };
 
 	i = 0u;
-    do {
+	do {
 		cmd = seq[i];
 
 // Before each 0 : empty RX + SEV
 
-        if (cmd == 0u) { local_emptyRxFifo(); sev(); }
+		if (cmd == 0u) { local_emptyRxFifo(); sev(); }
 
 // Send and waiting for the echo
 

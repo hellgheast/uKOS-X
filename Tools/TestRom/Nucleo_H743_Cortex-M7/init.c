@@ -1,10 +1,10 @@
 /*
 ; init.
 ; =====
-
+;
 ; SPDX-License-Identifier: MIT
 ; SPDX-FileCopyrightText: 2025-2026 Edo. Franzi
-
+;
 ;------------------------------------------------------------------------
 ; Author:	Edo. Franzi		The 2025-01-01
 ; Modifs:
@@ -144,8 +144,8 @@ static	void	local_USB_Configuration(void) {
 	RCC->AHB1LPENR &= ~RCC_AHB1LPENR_USB2OTGHSULPILPEN;
 
 	OTG2_HS_GLOBAL->OTG_HS_GCCFG   |=  USB_OTG_GCCFG_VBDEN;
-	OTG1_HS_GLOBAL->OTG_HS_GUSBCFG &= ~OTG2_HS_GLOBAL_OTG_HS_GUSBCFG_FHMOD;
-	OTG1_HS_GLOBAL->OTG_HS_GUSBCFG |=  OTG2_HS_GLOBAL_OTG_HS_GUSBCFG_FDMOD;
+	OTG2_HS_GLOBAL->OTG_HS_GUSBCFG &= ~OTG2_HS_GLOBAL_OTG_HS_GUSBCFG_FHMOD;
+	OTG2_HS_GLOBAL->OTG_HS_GUSBCFG |=  OTG2_HS_GLOBAL_OTG_HS_GUSBCFG_FDMOD;
 }
 
 /*

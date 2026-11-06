@@ -163,7 +163,7 @@ This allocates all remaining RAM after stacks as heap space.
 ### 4. Missing cmns_send() Function ❌→✅
 
 **Problem:**
-- `CMakeLists.txt` includes `../_Commun/Runtime/debug.c`
+- `CMakeLists.txt` includes `../_Common/Runtime/debug.c`
 - `debug.c` calls `cmns_send()` for console output
 - RISC-V `cmns.c` only had `cmns_wait()`, missing `cmns_send()`
 
@@ -176,12 +176,11 @@ undefined reference to `cmns_send'
 
 Added `cmns_send()` function to `cmns.c` (copied from ARM version):
 ```c
-void cmns_send(serialManager_t serialManager, const char_t *ascii) {
+void cmns_send([[maybe_unused]] serialManager_t serialManager, const char_t *ascii) {
     uint8_t     data;
     uint32_t    core;
     const char_t *wkAscii = ascii;
 
-    UNUSED(serialManager);
     core = GET_RUNNING_CORE;
     if (ascii == nullptr) { return; }
 

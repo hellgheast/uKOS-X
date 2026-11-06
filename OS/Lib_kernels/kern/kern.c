@@ -1,10 +1,10 @@
 /*
 ; kern.
 ; =====
-
+;
 ; SPDX-License-Identifier: MIT
 ; SPDX-FileCopyrightText: 2025-2026 Edo. Franzi
-
+;
 ;------------------------------------------------------------------------
 ; Author:	Edo. Franzi		The 2025-01-01
 ; Modifs:
@@ -190,7 +190,7 @@
 #include	"kern/private/private_kern.h"
 #include	"kern/private/private_processes.h"
 
-#define	KKERN_VERSION	" 1.1"
+#define	KKERN_VERSION	" 1.3"
 
 // uKOS-X specific (see the module.h)
 // ==================================

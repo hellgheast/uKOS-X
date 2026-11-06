@@ -1,10 +1,10 @@
 /*
 ; stub.
 ; =====
-
+;
 ; SPDX-License-Identifier: MIT
 ; SPDX-FileCopyrightText: 2025-2026 Edo. Franzi
-
+;
 ;------------------------------------------------------------------------
 ; Author:	Edo. Franzi		The 2025-01-01
 ; Modifs:
@@ -51,7 +51,7 @@
 
 extern	volatile	uint32_t	vCounter;
 
-#define	BPA0	0u
+#define	BPA00	0u
 
 // Prototypes
 
@@ -71,9 +71,10 @@ void	stub_intr_io_init(void) {
 	NVIC_SetPriority(EXTI0_C0_IRQn, KHW_PRIORITY_HIGH);
 	NVIC_EnableIRQ(EXTI0_C0_IRQn);
 
-	EXTI->FTSR1	  |= (1u<<BPA0);
-	EXTI->CPUPR1  |= (1u<<BPA0);
-	EXTI->CPUIMR1 |= (1u<<BPA0);
+	EXTI->RTSR1	  &= ~(1u<<BPA00);
+	EXTI->FTSR1	  |=  (1u<<BPA00);
+	EXTI->CPUPR1   =  (1u<<BPA00);
+	EXTI->CPUIMR1 |=  (1u<<BPA00);
 }
 
 /*
@@ -85,7 +86,7 @@ static	void	stub_intr_io_interruption(void) {
 
 	core = GET_RUNNING_CORE;
 
-	EXTI->CPUPR1 |= (1u<<BPA0);
+	EXTI->CPUPR1 = (1u<<BPA00);
 	vCounter++;
 
 	PREEMPTION_THRESHOLD(core);

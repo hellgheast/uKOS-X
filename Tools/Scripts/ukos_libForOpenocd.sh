@@ -1,11 +1,11 @@
 #!/usr/bin/env zsh
-
-# ukos_libForOpenocd
-# ==================
-
+#
+# ukos_libForOpenocd.
+# ===================
+#
 # SPDX-License-Identifier: MIT
 # SPDX-FileCopyrightText: 2025-2026 Edo. Franzi
-
+#
 #------------------------------------------------------------------------
 # Author:	Edo. Franzi		The 2025-01-01
 # Modifs:
@@ -22,7 +22,7 @@
 #			./ukos_libForOpenocd.sh
 #
 #			OS:
-#			OSX 26.xx			yes
+#			OSX 27.xx			yes
 #			Ubuntu 26.04 LTS	yes
 #
 #   (c) 2025-2026, Edo. Franzi

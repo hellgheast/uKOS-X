@@ -1,10 +1,10 @@
 /*
 ; temperature.
 ; ============
-
+;
 ; SPDX-License-Identifier: MIT
 ; SPDX-FileCopyrightText: 2025-2026 Edo. Franzi
-
+;
 ;------------------------------------------------------------------------
 ; Author:	Edo. Franzi		The 2025-01-01
 ; Modifs:
@@ -85,8 +85,8 @@ static	mutx_t		*vMutex_Reserve[KNB_CORES];
 
 static	int32_t		local_init(void);
 extern	int32_t		stub_temperature_init(void);
-extern	int32_t		stub_temperature_read(float64_t *temperature);
-extern	int32_t		stub_temperature_write(float64_t temperature);
+extern	int32_t		stub_temperature_read(float64_t *temperature_f);
+extern	int32_t		stub_temperature_write(float64_t temperature_f);
 
 /*
  * \brief Reserve the temperature manager
@@ -112,11 +112,9 @@ extern	int32_t		stub_temperature_write(float64_t temperature);
  * \return		KERR_TEMPERATURE_CHBSY	The manager is busy
  *
  */
-int32_t	temperature_reserve(reserveMode_t reserveMode, uint32_t timeout) {
+int32_t	temperature_reserve([[maybe_unused]] reserveMode_t reserveMode, uint32_t timeout) {
 	int32_t		status;
 	uint32_t	core;
-
-	UNUSED(reserveMode);
 
 	core = GET_RUNNING_CORE;
 
@@ -151,11 +149,9 @@ int32_t	temperature_reserve(reserveMode_t reserveMode, uint32_t timeout) {
  * \return		KERR_TEMPERATURE_CAREL	Cannot release the manager
  *
  */
-int32_t	temperature_release(reserveMode_t reserveMode) {
+int32_t	temperature_release([[maybe_unused]] reserveMode_t reserveMode) {
 	int32_t		status;
 	uint32_t	core;
-
-	UNUSED(reserveMode);
 
 	core = GET_RUNNING_CORE;
 
@@ -180,26 +176,26 @@ int32_t	temperature_release(reserveMode_t reserveMode) {
  *
  * \code{.c}
  * int32_t      status;
- * float64_t    temperature;
+ * float64_t    temperature_f;
  *
- *    status = temperature_read(&temperature);
+ *    status = temperature_read(&temperature_f);
  *
- *    (void)dprintf(KSYST, "Temp = %f\n", temperature);
+ *    (void)dprintf(KSYST, "Temp = %f\n", temperature_f);
  * \endcode
  *
- * \param[out]	*temperature			Ptr on the temperature
+ * \param[out]	*temperature_f			Ptr on the temperature
  * \return		KERR_TEMPERATURE_NOERR	OK
  * \return		KERR_TEMPERATURE_GEERR	General error
  *
  */
-int32_t	temperature_read(float64_t *temperature) {
+int32_t	temperature_read(float64_t *temperature_f) {
 	int32_t		status;
 
 	PRIVILEGE_ELEVATE;
 	status = local_init();
 	if (status != KERR_TEMPERATURE_NOERR) { PRIVILEGE_RESTORE; return (status); }
 
-	status = stub_temperature_read(temperature);
+	status = stub_temperature_read(temperature_f);
 	PRIVILEGE_RESTORE;
 	return (status);
 }
@@ -211,24 +207,24 @@ int32_t	temperature_read(float64_t *temperature) {
  *
  * \code{.c}
  * int32_t      status;
- * float64_t    temperature = 37.7 - KTEMPERATURE_ZERO_KELVIN;
+ * float64_t    temperature_f = 37.7 - KTEMPERATURE_ZERO_KELVIN;
  *
- *    status = temperature_write(temperature);
+ *    status = temperature_write(temperature_f);
  * \endcode
  *
- * \param[in]	temperature				The temperature
+ * \param[in]	temperature_f			The temperature
  * \return		KERR_TEMPERATURE_NOERR	OK
  * \return		KERR_TEMPERATURE_GEERR	General error
  *
  */
-int32_t	temperature_write(float64_t temperature) {
+int32_t	temperature_write(float64_t temperature_f) {
 	int32_t		status;
 
 	PRIVILEGE_ELEVATE;
 	status = local_init();
 	if (status != KERR_TEMPERATURE_NOERR) { PRIVILEGE_RESTORE; return (status); }
 
-	status = stub_temperature_write(temperature);
+	status = stub_temperature_write(temperature_f);
 	PRIVILEGE_RESTORE;
 	return (status);
 }

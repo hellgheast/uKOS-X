@@ -1,10 +1,10 @@
 /*
 ; stub_startUp.
 ; =============
-
+;
 ; SPDX-License-Identifier: MIT
 ; SPDX-FileCopyrightText: 2025-2026 Edo. Franzi
-
+;
 ;------------------------------------------------------------------------
 ; Author:	Edo. Franzi		The 2026-07-02
 ; Modifs:
@@ -118,8 +118,8 @@ void	stub_startUp_launch(void) {
 	configureURTx.oStopBits = KSERIAL_STOPBITS_1;
 	configureURTx.oParity   = KSERIAL_PARITY_NONE;
 	configureURTx.oBaudRate = aFunction[mode].oBaudrate;
-	configureURTx.oKernSync = ((uint32_t)1u<<(uint32_t)BSERIAL_SEMAPHORE_RX);
-	configureCDCx.oKernSync = ((uint32_t)1u<<(uint32_t)BSERIAL_SEMAPHORE_RX);
+	configureURTx.oKernSync = (uint8_t)(1u<<BSERIAL_SEMAPHORE_RX);
+	configureCDCx.oKernSync = (uint8_t)(1u<<BSERIAL_SEMAPHORE_RX);
 	serial_configure(KURT0, &configureURTx);
 	serial_configure(KCDC0, &configureCDCx);
 

@@ -1,10 +1,10 @@
 /*
 ; syscallDispatcher.
 ; ==================
-
+;
 ; SPDX-License-Identifier: MIT
 ; SPDX-FileCopyrightText: 2025-2026 Edo. Franzi
-
+;
 ;------------------------------------------------------------------------
 ; Author:	Edo. Franzi		The 2025-01-01
 ; Modifs:
@@ -79,9 +79,7 @@ void	SVCall_C0_IRQHandler(void) {
 }
 
 [[noreturn]]
-void	syscall(const uintptr_t *arg) {
-
-	UNUSED(arg);
+void	syscall([[maybe_unused]] const uintptr_t *arg) {
 
 	LOG(KFATAL_SYSTEM, "syscallDispatcher: no system call");
 	exit(EXIT_OS_PANIC_NO_SYSCALL);

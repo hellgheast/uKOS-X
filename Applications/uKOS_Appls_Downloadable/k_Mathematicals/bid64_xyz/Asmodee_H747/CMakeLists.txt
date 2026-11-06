@@ -1,9 +1,9 @@
 # CMakeLists.
 # ===========
-
+#
 # SPDX-License-Identifier: MIT
 # SPDX-FileCopyrightText: 2025-2026 Laurent von Allmen
-
+#
 #------------------------------------------------------------------------
 # Author:	Laurent von Allmen	The 2025-01-01
 # Modifs:
@@ -45,7 +45,7 @@
 #
 #------------------------------------------------------------------------
 
-cmake_minimum_required(VERSION 3.26)
+cmake_minimum_required(VERSION 3.31)
 
 # Applications CMake module setup
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/../../../../Mkfiles/cmake")

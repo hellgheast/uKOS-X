@@ -1,10 +1,10 @@
 /*
 ; model_kernel_tickless_tim_2_3_4_5_svc.
 ; ======================================
-
+;
 ; SPDX-License-Identifier: MIT
 ; SPDX-FileCopyrightText: 2025-2026 Edo. Franzi
-
+;
 ;------------------------------------------------------------------------
 ; Author:	Edo. Franzi		The 2025-01-01
 ; Modifs:
@@ -152,9 +152,12 @@ void	model_kernel_init(void) {
 
 	INTERRUPT_VECTOR(TIM2_C0_IRQn, local_TIM2_IRQHandler);
 	INTERRUPT_VECTOR(TIM5_C0_IRQn, local_TIM5_IRQHandler);
-	vVectors[15u + (uint32_t)PendSV_C0_IRQn] = (uintptr_t)PendSV_C0_IRQHandler;
-	vVectors[15u + (uint32_t)SVCall_C0_IRQn] = (uintptr_t)SVCall_C0_IRQHandler;
-	vVectors[15u + (uint32_t)TIM3_C0_IRQn]   = (uintptr_t)TIM3_C0_IRQHandler;
+
+// PendSV, SVCall and TIM3 are reached directly: g_pfnVectors_C0 (first.c) names
+// them, and exce_init() copies it into vVectors. They used to be written again
+// here at vVectors[15u + IRQn], one slot low (IRQn n lives at 16 + n): TIM3's
+// handler replaced TIM2's, so the first TIM2 overflow, 2^32 us = 71.6 min after
+// boot, ran the timeout handler, which never clears TIM2's flag, and livelocked
 
 	NVIC_SetPriority(TIM2_C0_IRQn, KINT_LEVEL_KERNEL_TIMERS);
 	NVIC_SetPriority(TIM5_C0_IRQn, KINT_LEVEL_KERNEL_TIMERS);
@@ -451,14 +454,10 @@ static	void	local_nextTime(uint64_t absTime) {
 
 	minNextTime = 0xFFFFFFFFFFFFFFFFu;
 	for (i = 0u; i < KKERN_NB_PRECISE_SIGNALS; i++) {
-		if ((vKern_prcs[KCORE_0][i].oState & (1u<<BPRCS_INSTALLED)) != 0u) {
-			if (vKern_prcs[KCORE_0][i].oMode != KPRCS_STOP) {
-				if (vKern_prcs[KCORE_0][i].oNextTime < minNextTime) {
-					minNextTime = vKern_prcs[KCORE_0][i].oNextTime;
-					found = true;
-					vPrcsIndex = i;
-				}
-			}
+		if (((vKern_prcs[KCORE_0][i].oState & (1u<<BPRCS_INSTALLED)) != 0u) && (vKern_prcs[KCORE_0][i].oMode != KPRCS_STOP) && (vKern_prcs[KCORE_0][i].oNextTime < minNextTime)) {
+			minNextTime = vKern_prcs[KCORE_0][i].oNextTime;
+			found = true;
+			vPrcsIndex = i;
 		}
 	}
 

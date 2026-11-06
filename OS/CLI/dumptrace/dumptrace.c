@@ -1,10 +1,10 @@
 /*
 ; dumptrace.
 ; ==========
-
+;
 ; SPDX-License-Identifier: MIT
 ; SPDX-FileCopyrightText: 2025-2026 Edo. Franzi
-
+;
 ;------------------------------------------------------------------------
 ; Author:	Edo. Franzi		The 2025-01-01
 ; Modifs:
@@ -66,7 +66,7 @@ STRG_LOC_CONST(aStrHelp[])		  = "Dump the circular trace buffer\n"
 
 									"Module built on "__DATE__"  "__TIME__" (c) EFr-2026\n\n";
 
-static	int32_t		prgm(uint32_t argc, const char_t *argv[]);
+static	int32_t		prgm([[maybe_unused]] uint32_t argc, [[maybe_unused]] const char_t *argv[]);
 
 MODULE(
 	Dumptrace,									// Module name (the first letter has to be upper case)
@@ -158,9 +158,14 @@ static	int32_t	prgm(uint32_t argc, const char_t *argv[]) {
 	for (i = 0; i < nbTraceWrites; i++) {
 		identifier = (rTraceFifo->oProcess == nullptr) ? ("From ISR") : (rTraceFifo->oProcess->oSpecification.oIdentifier);
 		local_compose(identifier, &idSpacer);
-		(void)dprintf(KSYST, "%12lld-us   0x%016"PRIXPTR"   %s%s  %s\n", rTraceFifo->oTimeStamp, rTraceFifo->oParameter, identifier, idSpacer, rTraceFifo->oMessage);
+		(void)dprintf(KSYST, "%12"PRIu64"-us   0x%016"PRIXPTR"   %s%s  %s\n", rTraceFifo->oTimeStamp, rTraceFifo->oParameter, identifier, idSpacer, rTraceFifo->oMessage);
 
-		rTraceFifo = (rTraceFifo == &traceFifo[KRECORD_SZ_TRACE_FIFO]) ? (traceFifo) : (rTraceFifo + 1u);
+// Advance, then wrap at one past the end, as the writer (record.c) and
+// recordDump.c do. Testing before advancing stepped onto the element past the
+// end, rendered it, and left the walk one slot out of step
+
+		rTraceFifo++;
+		rTraceFifo = (rTraceFifo == &traceFifo[KRECORD_SZ_TRACE_FIFO]) ? (traceFifo) : (rTraceFifo);
 	}
 	(void)dprintf(KSYST, "\n");
 	memo_delayedFree(traceFifo);
@@ -190,7 +195,7 @@ static	void	local_compose(const char_t *identifier, const char_t **idSpacer) {
 	size_t	len;
 
 // --------------------------------------|-------------------------------|---
-//                                      "Process_to_count_the_number_xyztu";
+//										"Process_to_count_the_number_xyztu";
 	static	const	char_t	aSpacer[] = "                                 ";
 
 	len = strlen(identifier);

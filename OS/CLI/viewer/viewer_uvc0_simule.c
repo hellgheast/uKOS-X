@@ -1,10 +1,10 @@
 /*
 ; viewer_uvc0_simule.
 ; ===================
-
+;
 ; SPDX-License-Identifier: MIT
 ; SPDX-FileCopyrightText: 2025-2026 Edo. Franzi
-
+;
 ;------------------------------------------------------------------------
 ; Author:	Edo. Franzi		The 2025-01-01
 ; Modifs:
@@ -100,7 +100,7 @@ static	void	local_prepareImage(uint8_t *image, uint32_t w, uint32_t h, uint32_t 
  * - Kill the "main". At this moment only the launched processes are executed
  *
  */
-int32_t	viewer_uvc0(uint32_t argc, const char_t *argv[]) {
+int32_t	viewer_uvc0([[maybe_unused]] uint32_t argc, [[maybe_unused]] const char_t *argv[]) {
 	uint32_t	core;
 	proc_t		*process;
 
@@ -108,9 +108,6 @@ int32_t	viewer_uvc0(uint32_t argc, const char_t *argv[]) {
 
 	STRG_LOC_CONST(aStrIden[]) = "Process_User";
 	STRG_LOC_CONST(aStrText[]) = "Process user.                             (c) EFr-2026";
-
-	UNUSED(argc);
-	UNUSED(argv);
 
 	core = GET_RUNNING_CORE;
 	vKillRequest[core] = false;
@@ -141,11 +138,8 @@ int32_t	viewer_uvc0(uint32_t argc, const char_t *argv[]) {
  *		- Free all the ressources
  *
  */
-int32_t	viewer_uvc0_clean(uint32_t argc, const char_t *argv[]) {
+int32_t	viewer_uvc0_clean([[maybe_unused]] uint32_t argc, [[maybe_unused]] const char_t *argv[]) {
 	uint32_t	core;
-
-	UNUSED(argc);
-	UNUSED(argv);
 
 	core = GET_RUNNING_CORE;
 	vKillRequest[core] = true;
@@ -167,7 +161,7 @@ int32_t	viewer_uvc0_clean(uint32_t argc, const char_t *argv[]) {
 [[noreturn]]
 static	void	aProcess(const void *argument) {
 			uint32_t	w, h;
-			float64_t	frameRate;
+			float64_t	frameRate_f;
 			uint8_t		*image_0, *image_1;
 			uint64_t	time[2];
 			graphic_t	pack_0, pack_1;
@@ -215,9 +209,9 @@ static	void	aProcess(const void *argument) {
 		TinyUSB_video_sendImage(image_1, w, h, local_callBack, (const void *)&pack_0);
 		kern_readTickCount(&time[1]);
 
-		frameRate = (1000000.0 / (float64_t)(time[1] - time[0])) * 2.0;
+		frameRate_f = (1000000.0 / (float64_t)(time[1] - time[0])) * 2.0;
 
-		(void)dprintf(KSYST, "Image size: %"PRIu32" x %"PRIu32", Frame rate = %5.2f-fps\n", w, h, frameRate);
+		(void)dprintf(KSYST, "Image size: %"PRIu32" x %"PRIu32", Frame rate = %5.2f-fps\n", w, h, frameRate_f);
 	}
 
 // Kill the process & the ressources

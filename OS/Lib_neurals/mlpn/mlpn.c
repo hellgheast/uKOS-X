@@ -1,10 +1,10 @@
 /*
 ; mlpn.
 ; =====
-
+;
 ; SPDX-License-Identifier: MIT
 ; SPDX-FileCopyrightText: 2025-2026 Edo. Franzi
-
+;
 ;------------------------------------------------------------------------
 ; Author:	Edo. Franzi		The 2025-01-01
 ; Modifs:
@@ -106,14 +106,15 @@ MODULE(
 
 static	void	local_init(void);
 static	void	local_initialiseLayer(mlpnLayer_t *layer);
+static	bool	local_isLayerValid(const mlpnLayer_t *layer);
 static	void	local_computeLayer(mlpnLayer_t *layer);
-static	void	local_nonLinear_tan0(const float32_t *w, const float32_t *x, float32_t *a, float32_t *y, uint32_t nbInput, uint32_t nbOutput);
-static	void	local_nonLinear_tan1(const float32_t *w, const float32_t *x, float32_t *a, float32_t *y, uint32_t nbInput, uint32_t nbOutput);
-static	void	local_nonLinear_tan2(const float32_t *w, const float32_t *x, float32_t *a, float32_t *y, uint32_t nbInput, uint32_t nbOutput);
-static	void	local_nonLinear_tan3(const float32_t *w, const float32_t *x, float32_t *a, float32_t *y, uint32_t nbInput, uint32_t nbOutput);
-static	void	local_nonLinear_relu(const float32_t *w, const float32_t *x, float32_t *a, float32_t *y, uint32_t nbInput, uint32_t nbOutput);
-static	void	local_nonLinear_line(const float32_t *w, const float32_t *x, float32_t *a, float32_t *y, uint32_t nbInput, uint32_t nbOutput);
-static	void	local_nonLinear_smax(const float32_t *w, const float32_t *x, float32_t *a, float32_t *y, uint32_t nbInput, uint32_t nbOutput);
+static	void	local_nonLinear_tan0(const float32_t *w_f, const float32_t *x_f, float32_t *a_f, float32_t *y_f, uint32_t nbInput, uint32_t nbOutput);
+static	void	local_nonLinear_tan1(const float32_t *w_f, const float32_t *x_f, float32_t *a_f, float32_t *y_f, uint32_t nbInput, uint32_t nbOutput);
+static	void	local_nonLinear_tan2(const float32_t *w_f, const float32_t *x_f, float32_t *a_f, float32_t *y_f, uint32_t nbInput, uint32_t nbOutput);
+static	void	local_nonLinear_tan3(const float32_t *w_f, const float32_t *x_f, float32_t *a_f, float32_t *y_f, uint32_t nbInput, uint32_t nbOutput);
+static	void	local_nonLinear_relu(const float32_t *w_f, const float32_t *x_f, float32_t *a_f, float32_t *y_f, uint32_t nbInput, uint32_t nbOutput);
+static	void	local_nonLinear_line(const float32_t *w_f, const float32_t *x_f, float32_t *a_f, float32_t *y_f, uint32_t nbInput, uint32_t nbOutput);
+static	void	local_nonLinear_smax(const float32_t *w_f, const float32_t *x_f, float32_t *a_f, float32_t *y_f, uint32_t nbInput, uint32_t nbOutput);
 
 /*
  * \brief Configure the mlpn manager
@@ -130,11 +131,11 @@ static	void	local_nonLinear_smax(const float32_t *w, const float32_t *x, float32
  * static                  float32_t          vActivation_L1[KMLPN_L1_NB_OUT];
  * static                  float32_t          vOutput_L1[KMLPN_L1_NB_OUT + 1];
  * static     const        float32_t          vWeight_L1[KMLPN_L1_NB_OUT][KMLPN_L1_NB_IN] = {
- *                                                { -0.7654f, 1.3442f, 4,6543f,  3,1234f },
- *                                                { 0.2654f, -5.3442f, 1,6543f,  8,1234f },
- *                                                { 0.3654f,  6.3442f, -2,6543f, 7,1234f },
- *                                                { 0.4654f, -7.3442f, 6,6543f,  3,1234f },
- *                                                { 05654f,  -6.3442f, 4,6543f,  1,1234f }
+ *                                                { -0.7654f, 1.3442f, 4.6543f,  3.1234f },
+ *                                                { 0.2654f, -5.3442f, 1.6543f,  8.1234f },
+ *                                                { 0.3654f,  6.3442f, -2.6543f, 7.1234f },
+ *                                                { 0.4654f, -7.3442f, 6.6543f,  3.1234f },
+ *                                                { 0.5654f, -6.3442f, 4.6543f,  1.1234f }
  *                                            };
  *
  * static     const        mlpnLayer_t       aLayer_L1 = {
@@ -160,7 +161,7 @@ static	void	local_nonLinear_smax(const float32_t *w, const float32_t *x, float32
  *                                                { 0.3654f,  9.3482f },
  *                                                { 0.4654f,  8.3442f },
  *                                                { 0.5684f,  3.3472f },
- *                                                { 0.0654f,  2.3442f },
+ *                                                { 0.0654f,  2.3442f }
  *                                            };
  *
  * static     const        mlpnLayer_t       aLayer_L2 = {
@@ -194,64 +195,46 @@ static	void	local_nonLinear_smax(const float32_t *w, const float32_t *x, float32
  * \param[in]	*network		Ptr on the network description
  * \return		KERR_MLPN_NOERR	OK
  * \return		KERR_MLPN_GEERR	General error
+ * \return		KERR_MLPN_CNERR	Configuration error
  * \return		KERR_MLPN_NOMEM	Not enough memory
  *
  */
 int32_t	mlpn_configure(const mlpnNetwork_t *network) {
+	mlpnLayer_t		*layers[5];
+	uint32_t		i;
 
 	local_init();
 
-// Initialise all the layers
+	layers[0] = network->oLayer_L1;
+	layers[1] = network->oLayer_L2;
+	layers[2] = network->oLayer_L3;
+	layers[3] = network->oLayer_L4;
+	layers[4] = network->oLayer_L5;
 
-	switch (network->oNBLayer) {
-		case 1u: {
-			if (network->oLayer_L1 == nullptr) { return (KERR_MLPN_GEERR); }
-			local_initialiseLayer(network->oLayer_L1);
-			break;
-		}
-		case 2u: {
-			if (network->oLayer_L1 == nullptr) { return (KERR_MLPN_GEERR); }
-			if (network->oLayer_L2 == nullptr) { return (KERR_MLPN_GEERR); }
-			local_initialiseLayer(network->oLayer_L1);
-			local_initialiseLayer(network->oLayer_L2);
-			break;
-		}
-		case 3u: {
-			if (network->oLayer_L1 == nullptr) { return (KERR_MLPN_GEERR); }
-			if (network->oLayer_L2 == nullptr) { return (KERR_MLPN_GEERR); }
-			if (network->oLayer_L3 == nullptr) { return (KERR_MLPN_GEERR); }
-			local_initialiseLayer(network->oLayer_L1);
-			local_initialiseLayer(network->oLayer_L2);
-			local_initialiseLayer(network->oLayer_L3);
-			break;
-		}
-		case 4u: {
-			if (network->oLayer_L1 == nullptr) { return (KERR_MLPN_GEERR); }
-			if (network->oLayer_L2 == nullptr) { return (KERR_MLPN_GEERR); }
-			if (network->oLayer_L3 == nullptr) { return (KERR_MLPN_GEERR); }
-			if (network->oLayer_L4 == nullptr) { return (KERR_MLPN_GEERR); }
-			local_initialiseLayer(network->oLayer_L1);
-			local_initialiseLayer(network->oLayer_L2);
-			local_initialiseLayer(network->oLayer_L3);
-			local_initialiseLayer(network->oLayer_L4);
-			break;
-		}
-		case 5u: {
-			if (network->oLayer_L1 == nullptr) { return (KERR_MLPN_GEERR); }
-			if (network->oLayer_L2 == nullptr) { return (KERR_MLPN_GEERR); }
-			if (network->oLayer_L3 == nullptr) { return (KERR_MLPN_GEERR); }
-			if (network->oLayer_L4 == nullptr) { return (KERR_MLPN_GEERR); }
-			if (network->oLayer_L5 == nullptr) { return (KERR_MLPN_GEERR); }
-			local_initialiseLayer(network->oLayer_L1);
-			local_initialiseLayer(network->oLayer_L2);
-			local_initialiseLayer(network->oLayer_L3);
-			local_initialiseLayer(network->oLayer_L4);
-			local_initialiseLayer(network->oLayer_L5);
-			break;
-		}
-		default: { return (KERR_MLPN_GEERR); }
+	if ((network->oNBLayer < 1u) || (network->oNBLayer > 5u)) {
+		return (KERR_MLPN_GEERR);
 	}
 
+// Every layer is checked before any is initialised, so a refused network is
+// left untouched. The contents were never checked: an oNBInput of 0 made
+// local_initialiseLayer() write oInput[0xFFFFFFFF], and a null vector or weight
+// pointer was only found by mlpn_compute() dereferencing it
+
+	for (i = 0u; i < network->oNBLayer; i++) {
+		if (layers[i] == nullptr) {
+			return (KERR_MLPN_GEERR);
+		}
+
+	}
+	for (i = 0u; i < network->oNBLayer; i++) {
+		if (local_isLayerValid(layers[i]) == false) {
+			return (KERR_MLPN_CNERR);
+		}
+
+	}
+	for (i = 0u; i < network->oNBLayer; i++) {
+		local_initialiseLayer(layers[i]);
+	}
 	return (KERR_MLPN_NOERR);
 }
 
@@ -354,6 +337,23 @@ static	void	local_init(void) {
 }
 
 /*
+ * \brief local_isLayerValid
+ *
+ * - A layer mlpn_configure() can initialise and mlpn_compute() can run: a known
+ *   non-linear function, at least one input (the bias) and one output, and all
+ *   four vectors present
+ *
+ */
+static	bool	local_isLayerValid(const mlpnLayer_t *layer) {
+
+	if (layer->oNonLinear > (uint32_t)KMLPN_SMAX)						{ return (false); }
+	if ((layer->oNBInput == 0u)		|| (layer->oNBOutput == 0u))		{ return (false); }
+	if ((layer->oInput  == nullptr) || (layer->oActivation == nullptr)) { return (false); }
+	if ((layer->oOutput == nullptr) || (layer->oWeight     == nullptr)) { return (false); }
+	return (true);
+}
+
+/*
  * \brief local_initialiseLayer
  *
  * - This function initialise a full NN layer
@@ -380,71 +380,71 @@ static	void	local_initialiseLayer(mlpnLayer_t *layer) {
 
 #if	(defined(__ARM_FEATURE_MVE) && (__ARM_FEATURE_MVE >= 3))
 [[gnu::always_inline]]
-static	inline	float32_t	local_hadd_f32x4(float32x4_t v) {
-	float32_t	tmp[4];
+static	inline	float32_t	local_hadd_f32x4(float32x4_t v_f) {
+	float32_t	tmp_f[4];
 
-	vstrwq_f32(tmp, v);
-	return (tmp[0] + tmp[1] + tmp[2] + tmp[3]);
+	vstrwq_f32(tmp_f, v_f);
+	return (tmp_f[0] + tmp_f[1] + tmp_f[2] + tmp_f[3]);
 }
 #endif
 
 [[gnu::always_inline]]
-static	inline	float32_t	local_dot_f32(const float32_t * __restrict w, const float32_t * __restrict x, uint16_t n) {
+static	inline	float32_t	local_dot_f32(const float32_t * __restrict w_f, const float32_t * __restrict x_f, uint16_t n) {
 
 	#if	(defined(__ARM_FEATURE_MVE) && (__ARM_FEATURE_MVE >= 3))
-    float32x4_t		acc0 = vdupq_n_f32(0.0f);
-    float32x4_t		acc1 = vdupq_n_f32(0.0f);
-    uint16_t		i = 0u, rem;
+	float32x4_t		acc0_f = vdupq_n_f32(0.0f);
+	float32x4_t		acc1_f = vdupq_n_f32(0.0f);
+	uint16_t		i = 0u, rem;
 
-	w = (const float32_t *)__builtin_assume_aligned(w, 16);
-	x = (const float32_t *)__builtin_assume_aligned(x, 16);
+	w_f = (const float32_t *)__builtin_assume_aligned(w_f, 16);
+	x_f = (const float32_t *)__builtin_assume_aligned(x_f, 16);
 
 // 8 floats per iteration
 
 	for (i = 0u; (uint16_t)(i + 8u) <= n; i = (uint16_t)(i + 8u)) {
-		float32x4_t		w0 = vldrwq_f32(&w[i + 0u]);
-		float32x4_t		x0 = vldrwq_f32(&x[i + 0u]);
-		acc0 = vfmaq_f32(acc0, w0, x0);
+		float32x4_t		w0 = vldrwq_f32(&w_f[i + 0u]);
+		float32x4_t		x0 = vldrwq_f32(&x_f[i + 0u]);
+		acc0_f = vfmaq_f32(acc0_f, w0, x0);
 
-		float32x4_t		w1 = vldrwq_f32(&w[i + 4u]);
-		float32x4_t		x1 = vldrwq_f32(&x[i + 4u]);
-		acc1 = vfmaq_f32(acc1, w1, x1);
-    }
+		float32x4_t		w1 = vldrwq_f32(&w_f[i + 4u]);
+		float32x4_t		x1 = vldrwq_f32(&x_f[i + 4u]);
+		acc1_f = vfmaq_f32(acc1_f, w1, x1);
+	}
 
 // Remaining: 0..7 floats, managed in 2 predictive blocs of 4
 
 	rem = (uint16_t)(n - i);
-    if (rem != 0u) {
+	if (rem != 0u) {
 
 // bloc 0..3
 
 		mve_pred16_t	p0 = vctp32q((uint32_t)rem);
-		float32x4_t		wR0 = vldrwq_z_f32(&w[i], p0);
-		float32x4_t		xR0 = vldrwq_z_f32(&x[i], p0);
+		float32x4_t		wR0 = vldrwq_z_f32(&w_f[i], p0);
+		float32x4_t		xR0 = vldrwq_z_f32(&x_f[i], p0);
 
-		acc0 = vfmaq_m_f32(acc0, wR0, xR0, p0);
+		acc0_f = vfmaq_m_f32(acc0_f, wR0, xR0, p0);
 
 // bloc 4..7 (if rem > 4)
 
 		if (rem > 4u) {
 			mve_pred16_t	p1 = vctp32q((uint32_t)(rem - 4u));
-			float32x4_t		wR1 = vldrwq_z_f32(&w[i + 4u], p1);
-			float32x4_t		xR1 = vldrwq_z_f32(&x[i + 4u], p1);
+			float32x4_t		wR1 = vldrwq_z_f32(&w_f[i + 4u], p1);
+			float32x4_t		xR1 = vldrwq_z_f32(&x_f[i + 4u], p1);
 
-			acc1 = vfmaq_m_f32(acc1, wR1, xR1, p1);
+			acc1_f = vfmaq_m_f32(acc1_f, wR1, xR1, p1);
 		}
 	}
 
 // Reduction
 
-	return (local_hadd_f32x4(vaddq_f32(acc0, acc1)));
+	return (local_hadd_f32x4(vaddq_f32(acc0_f, acc1_f)));
 
 	#else
 	float32_t	p = 0.0f;
 	uint16_t	i;
 
 	for (i = 0u; i < n; i++) {
-		p += w[i] * x[i];
+		p += w_f[i] * x_f[i];
 	}
     return (p);
 	#endif
@@ -472,7 +472,7 @@ static	void	local_computeLayer(mlpnLayer_t *layer) {
  *
  */
 NEURAL_OPTIMIZE
-static	void	local_nonLinear_tan0(const float32_t *w, const float32_t *x, float32_t *a, float32_t *y, uint32_t nbInput, uint32_t nbOutput) {
+static	void	local_nonLinear_tan0(const float32_t *w_f, const float32_t *x_f, float32_t *a_f, float32_t *y_f, uint32_t nbInput, uint32_t nbOutput) {
 	uint32_t	j;
 
 // For one neuron compute the activation
@@ -480,12 +480,12 @@ static	void	local_nonLinear_tan0(const float32_t *w, const float32_t *x, float32
 // Output = non-linear f(Activation)
 
 	for (j = 0u; j < nbOutput; j++) {
-		a[j] = local_dot_f32(w, x, (uint16_t)nbInput);
-		y[j] = tanhf(a[j]);
+		a_f[j] = local_dot_f32(w_f, x_f, (uint16_t)nbInput);
+		y_f[j] = tanhf(a_f[j]);
 
 // Next neuron, next weight set
 
-		w = &w[nbInput];
+		w_f = &w_f[nbInput];
 	}
 }
 
@@ -520,18 +520,18 @@ static	void	local_nonLinear_tan0(const float32_t *w, const float32_t *x, float32
  */
 [[gnu::always_inline]]
 static	inline	float32_t	local_tan1(float32_t p) {
-	float32_t	s, a, b;
+	float32_t	s, a_f, b;
 
 	if (p < -3.0f) { return (-1.0f); }
 	if (p > +3.0f) { return (+1.0f); }
 	s = p * p;
-	a = (((((s + 378.0f) * s) + 17325.0f) * s) + 135135.0f) * p;
+	a_f = (((((s + 378.0f) * s) + 17325.0f) * s) + 135135.0f) * p;
 	b = (((((28.0f * s) + 3150.0f) * s) + 62370.0f) * s) + 135135.0f;
-	return (a / b);
+	return (a_f / b);
 }
 
 NEURAL_OPTIMIZE
-static void	local_nonLinear_tan1(const float32_t *w, const float32_t *x, float32_t *a, float32_t *y, uint32_t nbInput, uint32_t nbOutput) {
+static void	local_nonLinear_tan1(const float32_t *w_f, const float32_t *x_f, float32_t *a_f, float32_t *y_f, uint32_t nbInput, uint32_t nbOutput) {
 	uint32_t	j;
 
 // For one neuron compute the activation
@@ -539,12 +539,12 @@ static void	local_nonLinear_tan1(const float32_t *w, const float32_t *x, float32
 // Output = non-linear f(Activation)
 
 	for (j = 0u; j < nbOutput; j++) {
-		a[j] = local_dot_f32(w, x, (uint16_t)nbInput);
-		y[j] = local_tan1(a[j]);
+		a_f[j] = local_dot_f32(w_f, x_f, (uint16_t)nbInput);
+		y_f[j] = local_tan1(a_f[j]);
 
 // Next neuron, next weight set
 
-		w = &w[nbInput];
+		w_f = &w_f[nbInput];
 	}
 }
 
@@ -568,11 +568,11 @@ static	inline	float32_t	local_tan2(float32_t p) {
 	p2 = p * p;
 	num = p * (27.0f + p2);
 	den = 27.0f + (9.0f * p2);
-    return (num / den);
+	return (num / den);
 }
 
 NEURAL_OPTIMIZE
-static	void	local_nonLinear_tan2(const float32_t *w, const float32_t *x, float32_t *a, float32_t *y, uint32_t nbInput, uint32_t nbOutput) {
+static	void	local_nonLinear_tan2(const float32_t *w_f, const float32_t *x_f, float32_t *a_f, float32_t *y_f, uint32_t nbInput, uint32_t nbOutput) {
 	uint32_t	j;
 
 // For one neuron compute the activation
@@ -580,12 +580,12 @@ static	void	local_nonLinear_tan2(const float32_t *w, const float32_t *x, float32
 // Output = non-linear f(Activation)
 
 	for (j = 0u; j < nbOutput; j++) {
-		a[j] = local_dot_f32(w, x, (uint16_t)nbInput);
-		y[j] = local_tan2(a[j]);
+		a_f[j] = local_dot_f32(w_f, x_f, (uint16_t)nbInput);
+		y_f[j] = local_tan2(a_f[j]);
 
 // Next neuron, next weight set
 
-		w = &w[nbInput];
+		w_f = &w_f[nbInput];
 	}
 }
 
@@ -608,7 +608,7 @@ static	inline	float32_t	local_tan3(float32_t p) {
 }
 
 NEURAL_OPTIMIZE
-static	void	local_nonLinear_tan3(const float32_t *w, const float32_t *x, float32_t *a, float32_t *y, uint32_t nbInput, uint32_t nbOutput) {
+static	void	local_nonLinear_tan3(const float32_t *w_f, const float32_t *x_f, float32_t *a_f, float32_t *y_f, uint32_t nbInput, uint32_t nbOutput) {
 	uint32_t	j;
 
 // For one neuron compute the activation
@@ -616,12 +616,12 @@ static	void	local_nonLinear_tan3(const float32_t *w, const float32_t *x, float32
 // Output = non-linear f(Activation)
 
 	for (j = 0u; j < nbOutput; j++) {
-		a[j] = local_dot_f32(w, x, (uint16_t)nbInput);
-		y[j] = local_tan3(a[j]);
+		a_f[j] = local_dot_f32(w_f, x_f, (uint16_t)nbInput);
+		y_f[j] = local_tan3(a_f[j]);
 
 // Next neuron, next weight set
 
-		w = &w[nbInput];
+		w_f = &w_f[nbInput];
 	}
 }
 
@@ -643,7 +643,7 @@ static	inline	float32_t	local_relu(float32_t p) {
 }
 
 NEURAL_OPTIMIZE
-static	void	local_nonLinear_relu(const float32_t *w, const float32_t *x, float32_t *a, float32_t *y, uint32_t nbInput, uint32_t nbOutput) {
+static	void	local_nonLinear_relu(const float32_t *w_f, const float32_t *x_f, float32_t *a_f, float32_t *y_f, uint32_t nbInput, uint32_t nbOutput) {
 	uint32_t	j;
 
 // For one neuron compute the activation
@@ -651,12 +651,12 @@ static	void	local_nonLinear_relu(const float32_t *w, const float32_t *x, float32
 // Output = non-linear f(Activation)
 
 	for (j = 0u; j < nbOutput; j++) {
-		a[j] = local_dot_f32(w, x, (uint16_t)nbInput);
-		y[j] = local_relu(a[j]);
+		a_f[j] = local_dot_f32(w_f, x_f, (uint16_t)nbInput);
+		y_f[j] = local_relu(a_f[j]);
 
 // Next neuron, next weight set
 
-		w = &w[nbInput];
+		w_f = &w_f[nbInput];
 	}
 }
 
@@ -669,7 +669,7 @@ static	void	local_nonLinear_relu(const float32_t *w, const float32_t *x, float32
  *
  */
 NEURAL_OPTIMIZE
-static	void	local_nonLinear_line(const float32_t *w, const float32_t *x, float32_t *a, float32_t *y, uint32_t nbInput, uint32_t nbOutput) {
+static	void	local_nonLinear_line(const float32_t *w_f, const float32_t *x_f, float32_t *a_f, float32_t *y_f, uint32_t nbInput, uint32_t nbOutput) {
 	uint32_t	j;
 
 // For one neuron compute the activation
@@ -677,12 +677,12 @@ static	void	local_nonLinear_line(const float32_t *w, const float32_t *x, float32
 // Output = non-linear f(Activation)
 
 	for (j = 0u; j < nbOutput; j++) {
-		a[j] = local_dot_f32(w, x, (uint16_t)nbInput);
-		y[j] = a[j];
+		a_f[j] = local_dot_f32(w_f, x_f, (uint16_t)nbInput);
+		y_f[j] = a_f[j];
 
 // Next neuron, next weight set
 
-		w = &w[nbInput];
+		w_f = &w_f[nbInput];
 	}
 }
 
@@ -718,32 +718,32 @@ static	inline	float32_t	local_exp(float32_t p) {
 }
 
 NEURAL_OPTIMIZE
-static	void	local_nonLinear_smax(const float32_t *w, const float32_t *x, float32_t *a, float32_t *y, uint32_t nbInput, uint32_t nbOutput) {
+static	void	local_nonLinear_smax(const float32_t *w_f, const float32_t *x_f, float32_t *a_f, float32_t *y_f, uint32_t nbInput, uint32_t nbOutput) {
 	uint32_t	j;
 	float32_t	max = -FLT_MAX, sum = 0.0f;
 
 // First compute the activation vector and the max value
 
 	for (j = 0u; j < nbOutput; j++) {
-		a[j] = local_dot_f32(w, x, (uint16_t)nbInput);
-		if (a[j] > max) { max = a[j]; }
+		a_f[j] = local_dot_f32(w_f, x_f, (uint16_t)nbInput);
+		if (a_f[j] > max) { max = a_f[j]; }
 
 // Next neuron, next weight set
 
-		w = &w[nbInput];
+		w_f = &w_f[nbInput];
 	}
 
 // Second compute the new activation vector e^(pj-max(p)) & the sum(e^(pj-max(pj)))
 
 	for (j = 0u; j < nbOutput; j++) {
-		a[j] = local_exp(a[j] - max);
-		sum = sum + a[j];
+		a_f[j] = local_exp(a_f[j] - max);
+		sum = sum + a_f[j];
 	}
 
 // Third normalise (give the probability)
 
 	for (j = 0u; j < nbOutput; j++) {
-		y[j] = a[j] / sum;
+		y_f[j] = a_f[j] / sum;
 	}
 }
 

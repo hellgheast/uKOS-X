@@ -1,10 +1,10 @@
 /*
 ; basic.
 ; ======
-
+;
 ; SPDX-License-Identifier: MIT
 ; SPDX-FileCopyrightText: 2025-2026 Edo. Franzi
-
+;
 ;------------------------------------------------------------------------
 ; Author:	Edo. Franzi		The 2025-01-01
 ; Modifs:
@@ -133,9 +133,7 @@ static	void	local_transfer(void);
  *
  */
 [[noreturn]]
-static	void	aProcess_0(const void *argument) {
-
-	UNUSED(argument);
+static	void	aProcess_0([[maybe_unused]] const void *argument) {
 
 	while (true) {
 		kern_suspendProcess(1000u);
@@ -151,9 +149,7 @@ static	void	aProcess_0(const void *argument) {
  *
  */
 [[noreturn]]
-static	void	aProcess_1(const void *argument) {
-
-	UNUSED(argument);
+static	void	aProcess_1([[maybe_unused]] const void *argument) {
 
 	volatile		uint8_t			*image;
 	static	const	imagerCnf_t	configureIMG0 = {
@@ -178,7 +174,7 @@ static	void	aProcess_1(const void *argument) {
 										.oStopBits		= KSERIAL_STOPBITS_1,
 										.oParity		= KSERIAL_PARITY_NONE,
 										.oBaudRate		= KSERIAL_BAUDRATE_3000000,
-										.oKernSync		= ((uint32_t)1u<<(uint32_t)BSERIAL_SEMAPHORE_RX)
+										.oKernSync		= (uint8_t)(1u<<BSERIAL_SEMAPHORE_RX)
 									};
 
 	if (kern_createSemaphore(aStrAcqu, 0, 1, &vSemaphore_IM) != KERR_KERN_NOERR) { LOG(KFATAL_USER, "Create sema G"); exit(EXIT_OS_FAILURE); }
@@ -228,9 +224,6 @@ MAIN_ENTRY(argc, argv[]) {
 	STRG_LOC_CONST(aStrText_0[]) = "Process user 0.                           (c) EFr-2026";
 	STRG_LOC_CONST(aStrIden_1[]) = "Process_User_1";
 	STRG_LOC_CONST(aStrText_1[]) = "Process user 1.                           (c) EFr-2026";
-
-	UNUSED(argc);
-	UNUSED(argv);
 
 // Specifications for the processes
 

@@ -1,10 +1,10 @@
 /*
 ; tests_01.
 ; =========
-
+;
 ; SPDX-License-Identifier: MIT
 ; SPDX-FileCopyrightText: 2025-2026 Edo. Franzi
-
+;
 ;------------------------------------------------------------------------
 ; Author:	Edo. Franzi		The 2025-01-01
 ; Modifs:
@@ -130,8 +130,6 @@ void	test_01(void) {
  */
 static	void	local_RTC_IRQHandler(void) {
 	static	uint8_t		state = 0;
-
-	UNUSED(number);
 
 	RTC->CTL &= ~RTC_CTL_SCIF;
 

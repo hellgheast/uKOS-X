@@ -1,10 +1,10 @@
 /*
 ; dump.
 ; =====
-
+;
 ; SPDX-License-Identifier: MIT
 ; SPDX-FileCopyrightText: 2025-2026 Edo. Franzi
-
+;
 ;------------------------------------------------------------------------
 ; Author:	Edo. Franzi		The 2025-01-01
 ; Modifs:
@@ -68,7 +68,7 @@ STRG_LOC_CONST(aStrHelp[])		  = "Dump a memory area\n"
 
 									"Module built on "__DATE__"  "__TIME__" (c) EFr-2026\n\n";
 
-static	int32_t		prgm(uint32_t argc, const char_t *argv[]);
+static	int32_t		prgm([[maybe_unused]] uint32_t argc, [[maybe_unused]] const char_t *argv[]);
 
 MODULE(
 	Dump,										// Module name (the first letter has to be upper case)
@@ -158,7 +158,7 @@ static	int32_t	prgm(uint32_t argc, const char_t *argv[]) {
 	}
 
 	if (error == false) { (void)dprintf(KSYST, "\n");				   status = EXIT_OS_SUCCESS_CLI; }
-	else				{ (void)dprintf(KSYST, "Protocol error.\n\n"); status = EXIT_OS_FAILURE;     }
+	else				{ (void)dprintf(KSYST, "Protocol error.\n\n"); status = EXIT_OS_FAILURE;	 }
 	return (status);
 }
 
@@ -179,11 +179,14 @@ static	void	local_printLine(const uint8_t *memory, uint32_t nbBytes) {
 			char_t		ascii[(8u * 2u) + 1u], element;
 	const	uint8_t		*param;
 
-	for (i = 0u; i < ((nbBytes + 16u) / 16u); i++) {
-		offset = (size_t)i * (size_t)16u;
-		param  = (const uint8_t *)(memory + offset);
+// One line per 16 bytes, rounded up: (nbBytes + 16) / 16 printed, and read, a
+// whole line past the range, and a line for an empty one
 
-		(void)dprintf(KSYST, "0x%016X: ", (uintptr_t)param);
+	for (i = 0u; i < ((nbBytes + 15u) / 16u); i++) {
+		offset = (size_t)i * (size_t)16u;
+		param  = (memory + offset);
+
+		(void)dprintf(KSYST, "0x%016"PRIXPTR": ", (uintptr_t)param);
 		for (j = 0u; j < 15u; j++) {
 			(void)dprintf(KSYST, "%02X,",  *(memory + ((size_t)i * (size_t)16u) + (size_t)j));
 		}

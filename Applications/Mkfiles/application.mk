@@ -1,9 +1,9 @@
 # application.
 # ============
-
+#
 # SPDX-License-Identifier: MIT
 # SPDX-FileCopyrightText: 2025-2026 Edo. Franzi
-
+#
 #------------------------------------------------------------------------
 # Author:	Edo. Franzi		The 2025-01-01
 # Modifs:
@@ -192,6 +192,14 @@ APPL_C_OBJ			=  $(patsubst %.c, %.o, $(notdir $(APPL_C_SRC)))
 APPL_CPP_SRC		=  $(foreach dir, $(APPL_SRC), $(wildcard $(dir)/*.cpp))
 APPL_CPP_OBJ		=  $(patsubst %.cpp, %.o, $(notdir $(APPL_CPP_SRC)))
 
+# Generated TFLite models (mlp_model.xxd --> mlp_model.c_inc)
+# The committed <name>.xxd hex dump is reverted to a temporary <name>.tflite
+# so that "xxd -i" emits the historical symbols <name>_tflite / <name>_tflite_len
+
+MODEL_XXD			=  $(sort $(foreach dir, $(APPL_SRC), $(wildcard $(dir)/_Training/*.xxd) $(wildcard $(dir)/_Models/*.xxd)))
+MODEL_C_INC			=  $(MODEL_XXD:.xxd=.c_inc)
+CLEAN				+= $(MODEL_C_INC)
+
 $(TARGET).elf : $(LINKS_LD) $(RUNTIME_OBJ) $(APPL_C_OBJ) $(APPL_CPP_OBJ) $(LIBS_FILES)
 	@echo "Linking $@"
 	$(HIDE)$(CXX) $(LDFLAGS)							\
@@ -212,6 +220,24 @@ vpath %.cpp	$(dir $(APPL_CPP_SRC))
 %.o : %.cpp
 	echo "Compiling $(notdir $<)"
 	$(HIDE)$(CXX) @$(PATH_VARI)/System/FLASH.cnf -c -o $@ $(CXXFLAGS) $<
+
+# The recipe works in a private temporary folder and atomically renames the
+# result, so that concurrent generations of the same model cannot corrupt it
+# (i.e. parallel builds reaching the file through differently spelt paths)
+
+%.c_inc : %.xxd
+	@echo "Generating $(@F)"
+	$(HIDE)cd $(@D) &&												\
+	tmp=.gen_$$$$ &&												\
+	trap 'rm -rf "$$tmp"' EXIT &&									\
+	mkdir "$$tmp" &&												\
+	xxd -r $(<F) "$$tmp/$(*F).tflite" &&							\
+	(cd "$$tmp" && xxd -i $(*F).tflite) > "$$tmp/$(*F).c_inc" &&	\
+	mv -f "$$tmp/$(*F).c_inc" $(@F)
+
+ifneq ($(MODEL_C_INC),)
+$(APPL_C_OBJ) $(APPL_CPP_OBJ) : $(MODEL_C_INC)
+endif
 
 %.bin : %.elf
 	$(OBJCOPY) -O binary --strip-all $< $@
@@ -244,11 +270,7 @@ ELFSIZE = $(SIZE) -A --radix=16 $(TARGET).elf
 size : $(TARGET).elf
 	@echo
 	@echo "Size of the generated program"
-	@cp $(TARGET).elf $(TARGET).elf.backup
-	@$(PATH_COMPILER)/bin/$(PREFIX)strip --strip-debug $(TARGET).elf
 	@$(ELFSIZE) | grep -F -v -e .debug -e .ARM.attributes -e .comment
-	@rm $(TARGET).elf
-	@mv $(TARGET).elf.backup $(TARGET).elf
 	@echo
 	$(HIDE)cat *.su | awk '{ $$3=""; printf("%s\t [Bytes] ---> %s\n",$$2, $$1); }' | sort -gro $(TARGET).stack
 

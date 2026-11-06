@@ -1,10 +1,10 @@
 /*
 ; privileges.
 ; ===========
-
+;
 ; SPDX-License-Identifier: MIT
 ; SPDX-FileCopyrightText: 2025-2026 Edo. Franzi
-
+;
 ;------------------------------------------------------------------------
 ; Author:	Edo. Franzi		The 2025-01-01
 ; Modifs:
@@ -108,7 +108,7 @@ void	privileges_init(void) {
  * \return		KERR_KERN_NOERR	OK
  *
  */
-int32_t	kern_setPrivilegeMode(uint8_t mode) {
+int32_t	kern_setPrivilegeMode([[maybe_unused]] uint8_t mode) {
 
 	#if (defined(PRIVILEGED_USER_S))
 	uint32_t	core;
@@ -162,9 +162,6 @@ int32_t	kern_setPrivilegeMode(uint8_t mode) {
 		}
 	}
 	INTERRUPTION_ON_HARD;
-
-	#else
-	UNUSED(mode);
 	#endif
 
 	return (KERR_KERN_NOERR);

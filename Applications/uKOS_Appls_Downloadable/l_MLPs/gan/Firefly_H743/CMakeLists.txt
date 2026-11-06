@@ -1,9 +1,9 @@
 # CMakeLists.
 # ===========
-
+#
 # SPDX-License-Identifier: MIT
 # SPDX-FileCopyrightText: 2025-2026 Laurent von Allmen
-
+#
 #------------------------------------------------------------------------
 # Author:	Laurent von Allmen	The 2025-01-01
 # Modifs:
@@ -45,7 +45,7 @@
 #
 #------------------------------------------------------------------------
 
-cmake_minimum_required(VERSION 3.26)
+cmake_minimum_required(VERSION 3.31)
 
 # Applications CMake module setup
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/../../../../Mkfiles/cmake")
@@ -55,20 +55,20 @@ include(set-project-paths)
 include(${PATH_UKOS}/Ports/Mkfiles/cmake/select-arm-toolchain.cmake)
 
 project(
-	debris
+	gan
 	VERSION 1.0
 	LANGUAGES CXX C
 )
 
-set(DISPLAY RK050HR18_5_Inches)
+set(DISPLAY WKS43WV067_5_Inches)
 set(PATH_LVGL ${PATH_UKOS}/Third_Parties/LVGL)
 
 # Microcontroller description (mandatory variables)
-set(SOC STM32V873)
-set(CORE CORTEX_M85)
+set(SOC STM32H743)
+set(CORE CORTEX_M7)
 
 # Target
-set(BOARD Discovery_V873)
+set(BOARD Firefly_H743)
 set(VARIANT Variant_Test)
 
 # Extra compilation options
@@ -90,17 +90,22 @@ set(PATH_INCLUDES
 	${PATH_LVGL}/Library/${DISPLAY}/${CORE}
 	${PATH_LVGL}/LVGL-current
 	${PATH_LVGL}/LVGL-current/src
-	${APP_DIR}/Classifier
-	${APP_DIR}/Graphics
+	${PATH_UKOS}/Applications/uKOS_Demos/gan/Classifier
+	${PATH_UKOS}/Applications/uKOS_Demos/gan/Graphics
+	${PATH_UKOS}/Applications/uKOS_Demos/gan/Graphics/Widgets
 )
 find_library(MYLIB TFLite ${PATH_UKOS}/Third_Parties/Tflite-micro/Library/${CORE})
 
+# Directories in the makefile's APPL_SRC declaration order -- the link order
+# of the make build is recovered from the first appearance of each directory.
 set(OBJ
-    ${PROJECT_SOURCE_DIR}/../Classifier/mlpn_classifier.c
-    ${PROJECT_SOURCE_DIR}/../Graphics/lvgl.c
-    ${PROJECT_SOURCE_DIR}/../Graphics/ui.c
-    ${PROJECT_SOURCE_DIR}/stub.c
-    ${PROJECT_SOURCE_DIR}/../Classifier/tfl_classifier.cpp
+    ${PATH_UKOS}/Applications/uKOS_Demos/gan/gan.cpp
+    ${PATH_UKOS}/Applications/uKOS_Demos/gan/Firefly_H743/stub.c
+    ${PATH_UKOS}/Applications/uKOS_Demos/gan/Classifier/nnh_classifier.c
+    ${PATH_UKOS}/Applications/uKOS_Demos/gan/Classifier/tfl_classifier.cpp
+    ${PATH_UKOS}/Applications/uKOS_Demos/gan/Graphics/lvgl.c
+    ${PATH_UKOS}/Applications/uKOS_Demos/gan/Graphics/ui.c
+    ${PATH_UKOS}/Applications/uKOS_Demos/gan/Graphics/Widgets/Firefly_H743/background/background.c
 )
 
 include(common)

@@ -1,10 +1,10 @@
 /*
 ; spi3.
 ; =====
-
+;
 ; SPDX-License-Identifier: MIT
 ; SPDX-FileCopyrightText: 2025-2026 Edo. Franzi
-
+;
 ;------------------------------------------------------------------------
 ; Author:	Edo. Franzi		The 2025-01-01
 ; Modifs:
@@ -112,11 +112,9 @@ extern	int32_t		stub_spi3_multipleWriteRead(const uint8_t *wData, uint16_t wSize
  * \return		KERR_SPI_CHBSY	The manager is busy
  *
  */
-int32_t	spi3_reserve(reserveMode_t reserveMode, uint32_t timeout) {
+int32_t	spi3_reserve([[maybe_unused]] reserveMode_t reserveMode, uint32_t timeout) {
 	int32_t		status;
 	uint32_t	core;
-
-	UNUSED(reserveMode);
 
 	core = GET_RUNNING_CORE;
 
@@ -151,11 +149,9 @@ int32_t	spi3_reserve(reserveMode_t reserveMode, uint32_t timeout) {
  * \return		KERR_SPI_CAREL	Cannot release the manager
  *
  */
-int32_t	spi3_release(reserveMode_t reserveMode) {
+int32_t	spi3_release([[maybe_unused]] reserveMode_t reserveMode) {
 	int32_t		status;
 	uint32_t	core;
-
-	UNUSED(reserveMode);
 
 	core = GET_RUNNING_CORE;
 
@@ -222,6 +218,7 @@ int32_t	spi3_configure(const spiCnf_t *configure) {
  * \param[in]	*data			Ptr on the data to write-read
  * \return		KERR_SPI_NOERR	OK
  * \return		KERR_SPI_GEERR	General error
+ * \return		KERR_SPI_TIMEO	Timeout error
  *
  */
 int32_t	spi3_writeRead(uint8_t *data) {
@@ -233,7 +230,7 @@ int32_t	spi3_writeRead(uint8_t *data) {
 	if (status != KERR_SPI_NOERR) { PRIVILEGE_RESTORE; return (status); }
 
 	wData[0] = *data;
-	status = stub_spi3_multipleWriteRead(&wData[0], 1u, &rData[0], 1u, KWAIT_INFINITY);
+	status = stub_spi3_multipleWriteRead(&wData[0], 1u, &rData[0], 1u, KSPI_TIMEOUT_WRITEREAD);
 
 	*data = rData[0];
 	PRIVILEGE_RESTORE;

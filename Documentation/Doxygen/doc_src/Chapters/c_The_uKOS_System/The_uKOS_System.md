@@ -253,10 +253,10 @@ mem0 13  XLS_  v1.0   list      List the system modules.                       (
 /*
 ; man.
 ; ====
-
+;
 ; SPDX-License-Identifier: MIT
 ; SPDX-FileCopyrightText: 2025-2026 Edo. Franzi
-
+;
 ;------------------------------------------------------------------------
 ; Author:     Edo. Franzi    The 2025-01-01
 ; Modifs:
@@ -378,10 +378,10 @@ static int32_t prgm(uint32_t argc, char_t *argv[]) {
 /*
 ; header.
 ; =======
-
+;
 ; SPDX-License-Identifier: MIT
 ; SPDX-FileCopyrightText: 2025-2026 Edo. Franzi
-
+;
 ;------------------------------------------------------------------------
 ; Author:     Edo. Franzi    The 2025-01-01
 ; Modifs:
@@ -421,10 +421,10 @@ const  header_t     appHeader = {
 ```c
 ; crt0_App.
 ; =========
-
+;
 ; SPDX-License-Identifier: MIT
 ; SPDX-FileCopyrightText: 2025-2026 Edo. Franzi
-
+;
 ;------------------------------------------------------------------------
 ; Author:     Edo. Franzi    The 2025-01-01
 ; Modifs:
@@ -588,10 +588,10 @@ void __wrap___stack_chk_fail(void) {
 ```c
 ; basic.
 ; ======
-
+;
 ; SPDX-License-Identifier: MIT
 ; SPDX-FileCopyrightText: 2025-2026 Edo. Franzi
-
+;
 ;------------------------------------------------------------------------
 ; Author:     Edo. Franzi    The 2025-01-01
 ; Modifs:
@@ -655,10 +655,8 @@ MODULE(
  *
  */
 [[noreturn]]
-static void aProcess_0(const void *argument) {
+static void aProcess_0([[maybe_unused]] const void *argument) {
     int32_t    cpt = 0;
-
-    UNUSED(argument);
 
     while (true) {
         kern_suspendProcess(P0_PERIOD);
@@ -672,10 +670,8 @@ static void aProcess_0(const void *argument) {
 }
 
 [[noreturn]]
-static void aProcess_1(const void *argument) {
+static void aProcess_1([[maybe_unused]] const void *argument) {
     int32_t    cpt = 0;
-
-    UNUSED(argument);
 
     while (true) {
         kern_suspendProcess(P1_PERIOD);
@@ -743,10 +739,10 @@ int main(uint32_t argc, const char_t *argv[]) {
 /*
 ; link_App.
 ; =========
-
+;
 ; SPDX-License-Identifier: MIT
 ; SPDX-FileCopyrightText: 2025-2026 Edo. Franzi
-
+;
 ;------------------------------------------------------------------------
 ; Author:     Edo. Franzi    The 2025-01-01
 ; Modifs:

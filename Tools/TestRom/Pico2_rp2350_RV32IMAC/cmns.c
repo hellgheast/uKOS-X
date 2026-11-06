@@ -1,10 +1,10 @@
 /*
 ; cmns.
 ; =====
-
+;
 ; SPDX-License-Identifier: MIT
 ; SPDX-FileCopyrightText: 2025-2026 Laurent von Allmen
-
+;
 ;------------------------------------------------------------------------
 ; Author:	Laurent von Allmen	The 2026-02-13
 ; Modifs:
@@ -161,11 +161,9 @@ void	cmns_send([[maybe_unused]] serialManager_t serialManager, const char_t *asc
  * \note This function does not return a value (None).
  *
  */
-void	cmns_receive(serialManager_t serialManager, char_t *data) {
+void	cmns_receive([[maybe_unused]] serialManager_t serialManager, char_t *data) {
 	uint32_t	core;
 	uint32_t	dr;
-
-	UNUSED(serialManager);
 
 	core = GET_RUNNING_CORE;
 

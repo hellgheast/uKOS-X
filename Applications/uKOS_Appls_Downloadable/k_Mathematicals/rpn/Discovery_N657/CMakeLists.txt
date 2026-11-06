@@ -1,9 +1,9 @@
 # CMakeLists.
 # ===========
-
+#
 # SPDX-License-Identifier: MIT
 # SPDX-FileCopyrightText: 2025-2026 Laurent von Allmen
-
+#
 #------------------------------------------------------------------------
 # Author:	Laurent von Allmen	The 2025-01-01
 # Modifs:
@@ -45,7 +45,7 @@
 #
 #------------------------------------------------------------------------
 
-cmake_minimum_required(VERSION 3.26)
+cmake_minimum_required(VERSION 3.31)
 
 # Applications CMake module setup
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/../../../../Mkfiles/cmake")
@@ -63,13 +63,12 @@ project(
 set(PATH_DECNUMBER ${PATH_UKOS}/Third_Parties/decnumber)
 
 # Microcontroller description (mandatory variables)
-set(SOC STM32H747)
-set(CORE CORTEX_M7)
+set(SOC STM32N657)
+set(CORE CORTEX_M55)
 
 # Target
-set(BOARD Asmodee_H747)
-set(VARIANT Variant_Test_CM7)
-set(BASE Base_CM7)
+set(BOARD Discovery_N657)
+set(VARIANT Variant_Test)
 
 # Extra compilation options
 add_compile_options(

@@ -1,10 +1,10 @@
 /*
 ; tests_06.
 ; =========
-
+;
 ; SPDX-License-Identifier: MIT
 ; SPDX-FileCopyrightText: 2025-2026 Edo. Franzi
-
+;
 ;------------------------------------------------------------------------
 ; Author:	Edo. Franzi		The 2025-01-01
 ; Modifs:
@@ -185,9 +185,7 @@ void	test_06(void) {
  * - Blink the RED Led
  *
  */
-void	process_0(uintptr_t *argument) {
-
-	UNUSED(argument);
+void	process_0([[maybe_unused]] uintptr_t *argument) {
 
 	cmns_send(KURT0, "Enter P0\n");
 
@@ -207,9 +205,7 @@ void	process_0(uintptr_t *argument) {
  * - Blink the GREEN Led
  *
  */
-void	process_1(uintptr_t *argument) {
-
-	UNUSED(argument);
+void	process_1([[maybe_unused]] uintptr_t *argument) {
 
 	cmns_send(KURT0, "Enter P1\n");
 

@@ -1,10 +1,10 @@
 /*
 ; uKOS.
 ; =====
-
+;
 ; SPDX-License-Identifier: MIT
 ; SPDX-FileCopyrightText: 2025-2026 Edo. Franzi
-
+;
 ;------------------------------------------------------------------------
 ; Author:	Edo. Franzi			The 2025-01-01
 ; Modifs:	Laurent von Allmen	The 2025-01-01
@@ -67,7 +67,7 @@ STRG_LOC_CONST(aStrHelp[])		  = "The uKOS-X information\n"
 
 									"Module built on "__DATE__"  "__TIME__" (c) EFr-2026\n\n";
 
-static	int32_t		prgm(uint32_t argc, const char_t *argv[]);
+static	int32_t		prgm([[maybe_unused]] uint32_t argc, [[maybe_unused]] const char_t *argv[]);
 
 MODULE(
 	UKOS,										// Module name (the first letter has to be upper case)

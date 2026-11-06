@@ -1,10 +1,10 @@
 /*
 ; stub_TinyUSB.
 ; =============
-
+;
 ; SPDX-License-Identifier: MIT
 ; SPDX-FileCopyrightText: 2025-2026 Edo. Franzi
-
+;
 ;------------------------------------------------------------------------
 ; Author:	Edo. Franzi		The 2025-01-01
 ; Modifs:
@@ -57,9 +57,6 @@
 // Ignore the GCC diagnostic
 //
 #pragma GCC diagnostic	ignored	"-Wpedantic"
-
-// cppcheck-suppress missingInclude
-//
 #include	"tusb.h"
 
 // Restore the GCC diagnostic

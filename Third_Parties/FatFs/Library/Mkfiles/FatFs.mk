@@ -1,9 +1,9 @@
 # FatFs.
 # ======
-
+#
 # SPDX-License-Identifier: MIT
 # SPDX-FileCopyrightText: 2025-2026 Edo. Franzi
-
+#
 #------------------------------------------------------------------------
 # Author:	Edo. Franzi		The 2025-01-01
 # Modifs:
@@ -58,10 +58,11 @@ LIB_SRC_DIR			=  $(PATH_FATFS)/FatFs-current/source
 PATH_INCLUDES		+= -I$(PATH_UKOS)/OS/Includes
 PATH_INCLUDES		+= -I$(PATH_UKOS)/OS/Lib_storages/storage
 PATH_INCLUDES		+= -I$(PATH_UKOS)/OS/Lib_storages/sdcard
-PATH_INCLUDES		+= -I$(PATH_UKOS)/OS/Lib_storages/serialFlash
+PATH_INCLUDES		+= -I$(PATH_UKOS)/OS/Lib_storages/sdnand
+PATH_INCLUDES		+= -I$(PATH_UKOS)/OS/Lib_storages/flash
 PATH_INCLUDES		+= -I$(PATH_UKOS)/Ports/EquatesModels/Devices
-PATH_INCLUDES		+= -I$(LIB_SRC_DIR)
-PATH_INCLUDES		+= -I$(LIB_SYS_DIR)
+PATH_INCLUDES		+= -isystem $(LIB_SRC_DIR)
+PATH_INCLUDES		+= -isystem $(LIB_SYS_DIR)
 
 SRC					=  $(LIB_SYS_DIR)/headerFatFs.c
 SRC					+= $(LIB_SYS_DIR)/diskio.c

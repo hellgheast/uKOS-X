@@ -131,15 +131,16 @@ urt0_configure(&configure);
 | **serial System Calls**                   |                                                              |
 | :---------------------------------------- | :----------------------------------------------------------- |
 | serial_reserve                            | Reserve the serial communication manager                     |
-| serial_release                            | Release the serial  communication manager                    |
-| serial_configure                          | Configure the serial  communication manager                  |
-| serial_write                              | Write a buffer to the serial  communication manager          |
-| serial_read                               | Read a buffer from the serial  communication manager         |
-| serial_flush                              | Flush the serial  communication manager                      |
-| serial_getIdSemaphore                     | Get the RX-TX semaphore id of the serial  communication manager |
-| serial_getDefSerialManager                | Get the default serial  communication manager                |
-| serial_setDefSerialManager                | Set the default serial  communication manager                |
-| serial_getFatherSerialManager             | Get the father (or older) serial  communication manager      |
+| serial_release                            | Release the serial communication manager                     |
+| serial_configure                          | Configure the serial communication manager                   |
+| serial_write                              | Write a buffer to the serial communication manager           |
+| serial_read                               | Read a buffer from the serial communication manager          |
+| serial_flush                              | Flush the serial communication manager                       |
+| serial_isConnected                        | Is the Serial Communication connected                        |
+| serial_getIdSemaphore                     | Get the RX-TX semaphore id of the serial communication manager |
+| serial_getDefSerialManager                | Get the default serial communication manager                 |
+| serial_setDefSerialManager                | Set the default serial communication manager                 |
+| serial_getFatherSerialManager             | Get the father (or older) serial  ommunication manager       |
 |                                           |                                                              |
 | **xyzt = urtx, cdcx, wfi0, System Calls** |                                                              |
 | xyzt_reserve                              | Reserve the xyzt Serial Communication Manager                |
@@ -148,6 +149,7 @@ urt0_configure(&configure);
 | xyzt_write                                | Write a buffer to the xyzt Serial Communication Manager      |
 | xyzt_read                                 | Read a buffer on the xyzt Serial Communication Manager       |
 | xyzt_flush                                | Flush of the xyzt Serial Communication Manager               |
+| xyzt_isConnected                          | Is the xyzt connected                                        |
 | xyzt_getIdSemaphore                       | Get the RX-TX semaphore id of the xyzt Serial Communication Manager |
 
 </div>
@@ -171,9 +173,7 @@ This is crucial when **multiple processes** share the **same serial communicatio
  *   Print a string
  */
 [[noreturn]]
-static void process_0(const void *argument) {
-
-    UNUSED(argument);
+static void process_0([[maybe_unused]] const void *argument) {
 
     while (true) {
         kern_suspendProcess(1000u);
@@ -192,9 +192,7 @@ static void process_0(const void *argument) {
  *   Print a string
  */
 [[noreturn]]
-static void process_1(const void *argument) {
-
-    UNUSED(argument);
+static void process_1([[maybe_unused]] const void *argument) {
 
     while (true) {
         kern_suspendProcess(879u);
@@ -438,7 +436,7 @@ KVALIDATION    = [
                       [0.490344,    0.051584,    0.98,    0.00],
                       [0.458057,   -0.458232,    0.98,    0.00],
                       [0.266116,    0.944208,    0.00,    0.98],
-                     [-0.002230,   -0.117944,    0.00,    0.98]
+                      [-0.002230,  -0.117944,    0.00,    0.98]
                  ]
 ```
 
@@ -472,11 +470,11 @@ static          float32_t    vOutput_L1[KMLPN_L1_NB_OUT + 1];
 
 [[gnu::aligned(16)]]
 static const    float32_t    vWeight_L1[KMLPN_L1_NB_OUT][KMLPN_L1_NB_IN] = {
-                                 { 4.834236f, -0.297750f, 2.434499f },
-                                 { 4.576709f, 2.125155f, -2.364352f },
-                                 { 1.647897f, 1.076677f, -0.753766f },
+                                 {  4.834236f, -0.297750f,  2.434499f },
+                                 {  4.576709f,  2.125155f, -2.364352f },
+                                 {  1.647897f,  1.076677f, -0.753766f },
                                  ...
-                                 { -0.959326f, 0.039206f, -0.011750f },
+                                 { -0.959326f,  0.039206f, -0.011750f },
                              };
 
 static mlpnLayer_t     aLayer_L1 = {
@@ -502,11 +500,11 @@ static          float32_t    vOutput_L2[KMLPN_L2_NB_OUT + 1];
 
 [[gnu::aligned(16)]]
 static const    float32_t    vWeight_L2[KMLPN_L2_NB_OUT][KMLPN_L2_NB_IN] = {
-                                 { 1.089468f, -0.555754f, ... , 0.199735f  },
-                                 { -0.206732f, 0.342678f, ... , -0.644606f },
-                                 { -0.305727f, 0.037768f, ... , -0.257604f },
+                                 {  1.089468f, -0.555754f, ... ,  0.199735f },
+                                 { -0.206732f,  0.342678f, ... , -0.644606f },
+                                 { -0.305727f,  0.037768f, ... , -0.257604f },
                                  ...
-                                 { 0.313270f, 1.834653f,  ... , 0.224265f  },
+                                 {  0.313270f,  1.834653f,  ... , 0.224265f },
                              };
 
 static mlpnLayer_t     aLayer_L2 = {
@@ -532,8 +530,8 @@ static          float32_t    vOutput_L3[KMLPN_L3_NB_OUT + 1];
 
 [[gnu::aligned(16)]]
 static const    float32_t    vWeight_L3[KMLPN_L3_NB_OUT][KL3_NB_IN] = {
-                                 { 1.447221f, 0.413932f,   ... , -0.704893f },
-                                 { -1.315357f, -0.809255f, ... , 1.526794f  },
+                                 {  1.447221f,  0.413932f, ... , -0.704893f },
+                                 { -1.315357f, -0.809255f, ... ,  1.526794f },
                              };
 
 static mlpnLayer_t     aLayer_L3 = {
@@ -566,10 +564,10 @@ static const    mlpnNetwork_t     aNetwork = {
 /*
 ; class_Py.
 ; =========
-
+;
 ; SPDX-License-Identifier: MIT
 ; SPDX-FileCopyrightText: 2025-2026 Edo. Franzi
-
+;
 ;------------------------------------------------------------------------
 ; Author:     Edo. Franzi    The 2025-01-01
 ; Modifs:
@@ -641,13 +639,11 @@ MODULE(
  *
  */
 [[noreturn]]
-static void aProcess_0(const void *argument) {
+static void aProcess_0([[maybe_unused]] const void *argument) {
     float32_t    x, y, result, gain = 2.0f;
     uint64_t     time[2];
     uint32_t     delta = 0u;
     char_t       *winner;
-
-    UNUSED(argument);
 
     mlpn_configure(&aNetwork);
 
@@ -880,7 +876,7 @@ Acts as the abstraction boundary for all mass-storage devices. All interactions 
 💾 **sdcard – SD Card Storage Management:**
 Implements SD/MMC/SDHC/SDXC support over SPI or SDIO, including card initialisation, CSD/CID parsing, block addressing, and high-speed modes. Provides proper device access via DMA, multi-block transfers, card-detect and write-protect handling, error recovery/retries, and optional TRIM/ERASE. Integrates with FatFs (including exFAT when enabled) and offers performance hints (alignment, prefetch, burst length).
 
-🧠 **serialFlash – Serial Flash Storage Management:**
+🧠 **flash – flash Storage Management:**
 Manages serial NOR flash over SPI/QSPI with JEDEC ID auto-detection, 3/4-byte addressing, page program, sector/block erase, chip erase, and status-polling (WIP/WEL). Supports quad-I/O enable, memory-mapped/XIP modes (when supported by the MCU), deep power-down, and power-safe update flows (A/B image slots). Provides hooks for wear-leveling and logical-to-physical mapping; optional ECC/bad-block handling when targeting SPI-NAND variants.
 
 #### *Design Consistency and Extensibility*
@@ -891,33 +887,33 @@ This consistency simplifies system integration, improves maintainability, and fa
 
 <div class="full_width_table">
 
-| **storage System Calls**     |                                                     |
-| :--------------------------- | :-------------------------------------------------- |
-| storage_reserve              | Reserve the storage manager                         |
-| storage_release              | Release the storage manager                         |
-| storage_initialise           | Initialise the storage manager                      |
-| storage_readStatus           | Read the status of the storage manager              |
-| storage_read                 | Read 1 or more sectors from the storage manager     |
-| storage_write                | Write 1 or more sectors to the storage manager      |
-| storage_ioctl                | Get some storage parameters by ioctl                |
-|                              |                                                     |
-| **sdcard System Calls**      |                                                     |
-| sdcard_reserve               | Reserve the sdcard manager                          |
-| sdcard_release               | Release the sdcard manager                          |
-| sdcard_initialise            | Initialise the sdcard manager                       |
-| sdcard_readStatus            | Read the status of the sdcard manager               |
-| sdcard_read                  | Read 1 or more sectors from the sdcard manager      |
-| sdcard_write                 | Write 1 or more sectors to the sdcard manager       |
-| sdcard_ioctl                 | Get some sdcard parameters by ioctl                 |
-|                              |                                                     |
-| **serialFlash System Calls** |                                                     |
-| serialFlash_reserve          | Reserve the serialFlash manager                     |
-| serialFlash_release          | Release the serialFlash manager                     |
-| serialFlash_initialise       | Initialise the serialFlash manager                  |
-| serialFlash_readStatus       | Read the status of the serialFlash manager          |
-| serialFlash_read             | Read 1 or more sectors from the serialFlash manager |
-| serialFlash_write            | Write 1 or more sectors to the serialFlash manager  |
-| serialFlash_ioctl            | Get some serialFlash parameters by ioctl            |
+| **storage System Calls** |                                                 |
+| :----------------------- | :---------------------------------------------- |
+| storage_reserve          | Reserve the storage manager                     |
+| storage_release          | Release the storage manager                     |
+| storage_initialise       | Initialise the storage manager                  |
+| storage_isPresent        | Check if the the storage manager is present     |
+| storage_read             | Read 1 or more sectors from the storage manager |
+| storage_write            | Write 1 or more sectors to the storage manager  |
+| storage_ioctl            | Get some storage parameters by ioctl            |
+|                          |                                                 |
+| **sdcard System Calls**  |                                                 |
+| sdcard_reserve           | Reserve the sdcard manager                      |
+| sdcard_release           | Release the sdcard manager                      |
+| sdcard_initialise        | Initialise the sdcard manager                   |
+| sdcard_isPresent         | Check if the the sdcard is present              |
+| sdcard_read              | Read 1 or more sectors from the sdcard manager  |
+| sdcard_write             | Write 1 or more sectors to the sdcard manager   |
+| sdcard_ioctl             | Get some sdcard parameters by ioctl             |
+|                          |                                                 |
+| **flash System Calls**   |                                                 |
+| flash_reserve            | Reserve the flash manager                       |
+| flash_release            | Release the flash manager                       |
+| flash_initialise         | Initialise the flash manager                    |
+| flash_isPresent          | Check if the the flash is present               |
+| flash_read               | Read 1 or more sectors from the flash manager   |
+| flash_write              | Write 1 or more sectors to the flash manager    |
+| flash_ioctl              | Get some flash parameters by ioctl              |
 
 </div>
 

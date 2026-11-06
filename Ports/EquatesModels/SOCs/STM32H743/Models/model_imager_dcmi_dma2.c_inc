@@ -1,10 +1,10 @@
 /*
 ; model_imager_dcmi_dma2.
 ; =======================
-
+;
 ; SPDX-License-Identifier: MIT
 ; SPDX-FileCopyrightText: 2025-2026 Edo. Franzi
-
+;
 ;------------------------------------------------------------------------
 ; Author:	Edo. Franzi		The 2025-01-01
 ; Modifs:
@@ -455,13 +455,11 @@ static	int32_t	local_confPixe(const imagerCnf_t *configure) {
  * - Configure the memory buffers
  *
  */
-static	int32_t	local_confMemo(const imagerCnf_t *configure) {
+static	int32_t	local_confMemo([[maybe_unused]] const imagerCnf_t *configure) {
 			int32_t		status	 = KERR_IMAGER_NOERR;
 	const	size_t		nbPixels = (size_t)vFrameNbPixels;
 	const	size_t		elemSize = (size_t)vSize;
 	const	size_t		nbBytes	 = nbPixels * elemSize;
-
-	UNUSED(configure);
 
 	if (vImageE0 != nullptr) { memo_free(vImageE0); }
 
@@ -514,8 +512,8 @@ static	int32_t	local_confImag(const imagerCnf_t *configure) {
 
 // The semaphore mode
 
-	vWithSemaphore_IM = ((configure->oKernSync & ((uint32_t)1u<<(uint32_t)BIMAGER_SEMAPHORE_IM)) != 0u) ? (true) : (false);
-	vWithSemaphore_VS = ((configure->oKernSync & ((uint32_t)1u<<(uint32_t)BIMAGER_SEMAPHORE_VS)) != 0u) ? (true) : (false);
+	vWithSemaphore_IM = ((configure->oKernSync & (uint8_t)(1u<<BIMAGER_SEMAPHORE_IM)) != 0u) ? (true) : (false);
+	vWithSemaphore_VS = ((configure->oKernSync & (uint8_t)(1u<<BIMAGER_SEMAPHORE_VS)) != 0u) ? (true) : (false);
 
 // The interruption callbacks
 // Start the stream

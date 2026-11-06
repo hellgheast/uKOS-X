@@ -1,9 +1,9 @@
 # makefile.
 # =========
-
+#
 # SPDX-License-Identifier: MIT
 # SPDX-FileCopyrightText: 2025-2026 Edo. Franzi
-
+#
 #------------------------------------------------------------------------
 # Author:	Edo. Franzi		The 2025-01-01
 # Modifs:
@@ -49,7 +49,7 @@ PROJECT			=  test_fatfs
 
 # Target & Infrastructure
 
-PATH_INCLUDES	+= -I$(PATH_UKOS)/Third_Parties/FatFs/FatFs-current/source
+PATH_INCLUDES	+= -isystem $(PATH_UKOS)/Third_Parties/FatFs/FatFs-current/source
 PATH_INCLUDES	+= -I$(PATH_UKOS)/Third_Parties/FatFs/Construction/System
 
 

@@ -1,10 +1,10 @@
 /*
 ; lib_storages.
 ; =============
-
+;
 ; SPDX-License-Identifier: MIT
 ; SPDX-FileCopyrightText: 2025-2026 Edo. Franzi
-
+;
 ;------------------------------------------------------------------------
 ; Author:	Edo. Franzi		The 2025-01-01
 ; Modifs:
@@ -80,8 +80,11 @@
 #if (defined(CONFIG_MAN_SDCARD_S))
 #include	"sdcard/sdcard.h"
 #endif
-#if (defined(CONFIG_MAN_SERIAL_FLASH_S))
-#include	"serialFlash/serialFlash.h"
+#if (defined(CONFIG_MAN_SDNAND_S))
+#include	"sdnand/sdnand.h"
+#endif
+#if (defined(CONFIG_MAN_FLASH_S))
+#include	"flash/flash.h"
 #endif
 
 // IWYU pragma: end_exports

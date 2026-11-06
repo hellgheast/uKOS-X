@@ -1,10 +1,10 @@
 /*
 ; process_dispatcher.
 ; ===================
-
+;
 ; SPDX-License-Identifier: MIT
 ; SPDX-FileCopyrightText: 2025-2026 Edo. Franzi
-
+;
 ;------------------------------------------------------------------------
 ; Author:	Edo. Franzi		The 2025-01-01
 ; Modifs:
@@ -96,10 +96,8 @@ bool	installaProcess_dispatcher(void) {
  *
  */
 [[noreturn]]
-static	void	aProcess(const void *argument) {
+static	void	aProcess([[maybe_unused]] const void *argument) {
 	uintptr_t	message;
-
-	UNUSED(argument);
 
 	while (vQueue_dispatcher == nullptr) { kern_suspendProcess(1u); }
 

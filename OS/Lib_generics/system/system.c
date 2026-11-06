@@ -1,10 +1,10 @@
 /*
 ; system.
 ; =======
-
+;
 ; SPDX-License-Identifier: MIT
 ; SPDX-FileCopyrightText: 2025-2026 Edo. Franzi
-
+;
 ;------------------------------------------------------------------------
 ; Author:	Edo. Franzi		The 2025-01-01
 ; Modifs:
@@ -133,12 +133,9 @@ static	int32_t	local_init(void);
  * \return		KERR_SYSTEM_CHBSY	The manager is busy
  *
  */
-int32_t	system_reserve(reserveMode_t reserveMode, uint32_t timeout) {
+int32_t	system_reserve([[maybe_unused]] reserveMode_t reserveMode, [[maybe_unused]] uint32_t timeout) {
 	int32_t		status;
 	uint32_t	core;
-
-	UNUSED(reserveMode);
-	UNUSED(timeout);
 
 	core = GET_RUNNING_CORE;
 
@@ -178,11 +175,9 @@ int32_t	system_reserve(reserveMode_t reserveMode, uint32_t timeout) {
  * \return		KERR_SYSTEM_CAREL	Cannot release the manager
  *
  */
-int32_t	system_release(reserveMode_t reserveMode) {
+int32_t	system_release([[maybe_unused]] reserveMode_t reserveMode) {
 	int32_t		status;
 	uint32_t	core;
-
-	UNUSED(reserveMode);
 
 	core = GET_RUNNING_CORE;
 

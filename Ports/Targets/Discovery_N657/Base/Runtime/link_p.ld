@@ -1,10 +1,10 @@
 /*
 ; link_p.
 ; =======
-
+;
 ; SPDX-License-Identifier: MIT
 ; SPDX-FileCopyrightText: 2025-2026 Edo. Franzi
-
+;
 ;------------------------------------------------------------------------
 ; Author:	Edo. Franzi		The 2025-01-01
 ; Modifs:
@@ -86,7 +86,8 @@ INCLUDE		STM32N657xD.ld
 /*			(1500K)				0x343BFFFF					*/
 /*			enough: 800x480x4	1500K						*/
 /* APSRAM:	stUMemo				0x90000000					*/
-/*			32M												*/
+/*			16M, for the applications						*/
+/*			16M, for the NUP								*/
 
 /* IMPORTANT:												*/
 /* all the stacks have to be maintained aligned				*/
@@ -111,7 +112,7 @@ linker_stPrgmData			= (linker_stPrgmCode + linker_lnPrgmCode);								/* 0x341C2
 linker_lnPrgmData			= (256K);																/* Length of the RAM										*/
 
 linker_stUMemo				= 0x90000000;															/* 0x90000000: UMemo, start of the user memory 				*/
-linker_lnUMemo				= (32 * 1024K);															/* Length of the user memory	  							*/
+linker_lnUMemo				= (16 * 1024K);															/* Length of the user memory	  							*/
 
 linker_stExtFlash			= 0x70000000;															/* 0x70000000: ExtFlash, start of the external flash memory	*/
 linker_lnExtFlash			= (128 * 1024K);														/* Length of the external flash memory						*/
@@ -140,7 +141,7 @@ linker_ST_RAM_INT_3			= linker_stLCD_F_BUFFER;												/* 0x34242000: Privile
 linker_EN_RAM_INT_3			= (linker_stLCD_F_BUFFER + 1500K - 1);									/* 0x343BFFFF: 1500-K										*/
 
 linker_ST_APSRAM			= linker_stUMemo;														/* 0x90000000: Privileged/User RAM							*/
-linker_EN_APSRAM			= (linker_stUMemo + linker_lnUMemo - 1);								/* 0x91FFFFFF: 32-M											*/
+linker_EN_APSRAM			= (linker_stUMemo + linker_lnUMemo - 1);								/* 0x90FFFFFF: 16-M, the user memory						*/
 
 linker_ST_OCTOFLASH			= linker_stExtFlash;													/* 0x70000000: Privileged/User RAM							*/
 linker_EN_OCTOFLASH			= (linker_stExtFlash + linker_lnExtFlash - 1);							/* 0x77FFFFFF: 128-M										*/

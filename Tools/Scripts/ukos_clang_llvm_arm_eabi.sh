@@ -1,11 +1,11 @@
 #!/usr/bin/env zsh
-
+#
 # ukos_clang_llvm_arm_eabi.
 # =========================
-
+#
 # SPDX-License-Identifier: MIT
 # SPDX-FileCopyrightText: 2025-2026 Laurent von Allmen
-
+#
 #------------------------------------------------------------------------
 # Author:	Laurent von Allmen	The 2025-01-22
 # Modifs:
@@ -30,7 +30,7 @@
 #			./ukos_clang_llvm_arm_eabi.sh
 #
 #			OS:
-#			OSX 26.xx			yes
+#			OSX 27.xx			yes
 #			Ubuntu 26.04 LTS	yes
 #
 #	(c) 2025-2026, Laurent von Allmen

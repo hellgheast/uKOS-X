@@ -1,10 +1,10 @@
 /*
 ; img0.
 ; =====
-
+;
 ; SPDX-License-Identifier: MIT
 ; SPDX-FileCopyrightText: 2025-2026 Edo. Franzi
-
+;
 ;------------------------------------------------------------------------
 ; Author:	Edo. Franzi		The 2025-01-01
 ; Modifs:
@@ -118,11 +118,9 @@ extern  int32_t		stub_imager_exposure(uint32_t time);
  * \return		KERR_IMAGER_CHBSY	The manager is busy
  *
  */
-int32_t	imager_reserve(reserveMode_t reserveMode, uint32_t timeout) {
+int32_t	imager_reserve([[maybe_unused]] reserveMode_t reserveMode, uint32_t timeout) {
 	int32_t		status;
 	uint32_t	core;
-
-	UNUSED(reserveMode);
 
 	core = GET_RUNNING_CORE;
 
@@ -157,11 +155,9 @@ int32_t	imager_reserve(reserveMode_t reserveMode, uint32_t timeout) {
  * \return		KERR_IMAGER_CAREL	Cannot release the manager
  *
  */
-int32_t	imager_release(reserveMode_t reserveMode) {
+int32_t	imager_release([[maybe_unused]] reserveMode_t reserveMode) {
 	int32_t		status;
 	uint32_t	core;
-
-	UNUSED(reserveMode);
 
 	core = GET_RUNNING_CORE;
 

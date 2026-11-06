@@ -1,10 +1,10 @@
 /*
 ; hexloader.
 ; ==========
-
+;
 ; SPDX-License-Identifier: MIT
 ; SPDX-FileCopyrightText: 2025-2026 Edo. Franzi
-
+;
 ;------------------------------------------------------------------------
 ; Author:	Edo. Franzi		The 2025-01-01
 ; Modifs:
@@ -93,7 +93,7 @@ STRG_LOC_CONST(aStrHelp[])		  = "Intel hex+ (32-bit) loader\n"
 
 									"Module built on "__DATE__"  "__TIME__" (c) EFr-2026\n\n";
 
-static	int32_t		prgm(uint32_t argc, const char_t *argv[]);
+static	int32_t		prgm([[maybe_unused]] uint32_t argc, [[maybe_unused]] const char_t *argv[]);
 
 MODULE(
 	Hexloader,									// Module name (the first letter has to be upper case)
@@ -118,7 +118,8 @@ enum {
 		KERR_H_LOADER_BFU,
 		KERR_H_LOADER_NOI,
 		KERR_H_LOADER_FRA,
-		KERR_H_LOADER_PAR
+		KERR_H_LOADER_PAR,
+		KERR_H_LOADER_HEX
 };
 
 enum {
@@ -135,7 +136,7 @@ static	int32_t		local_getExecAddress(uint8_t **address, uint8_t *checksum);
 static	int32_t		local_getData(const uint8_t *counter, uint8_t *checksum, uint8_t *address);
 static	int32_t		local_getHexValue(uint8_t *value);
 static	int32_t		local_getByte(uint8_t *byte);
-static	bool		local_checkSignature(void);
+static	bool		local_isApplication(int32_t (*code)(uint32_t argc, const char_t *argv[]));
 
 /*
  * \brief Main entry point
@@ -202,7 +203,7 @@ static	int32_t	prgm(uint32_t argc, const char_t *argv[]) {
 							address = (uint8_t *)(page + offset);
 							error = local_getData(&counter, &checksum, address); if (error != KERR_H_LOADER_NOT) { terminate = true; break; }
 							error = local_getHexValue(&hexValue);				 if (error != KERR_H_LOADER_NOT) { terminate = true; break; }
-							if (hexValue != (uint8_t)(0u - checksum))        	   { error  = KERR_H_LOADER_CHK;   terminate = true; break; }
+							if (hexValue != (uint8_t)(0u - checksum))			   { error  = KERR_H_LOADER_CHK;   terminate = true; break; }
 							break;
 						}
 						case 1u: {
@@ -263,10 +264,13 @@ static	int32_t	prgm(uint32_t argc, const char_t *argv[]) {
 			system_getDownloadCodeAddress((void **)&code);
 			if (run == KRUN) {
 
+// Jump only to an application built for this system: a download without a
+// start-address record leaves code at nullptr, and a signature left in the user
+// memory by an earlier download used to be enough to jump there anyway.
 // Invalidate the header to prevent another execution, like after the reset
 // if the automatic execution from a debugger is installed.
 
-				if (local_checkSignature() == true) {
+				if (local_isApplication(code) == true) {
 					ramHeader.oMemLocation	  = KNO_MEM;
 					ramHeader.oStart		  = nullptr;
 					ramHeader.oLnApplication  = 0u;
@@ -287,8 +291,17 @@ static	int32_t	prgm(uint32_t argc, const char_t *argv[]) {
 		case KERR_H_LOADER_NOI: { (void)dprintf(KSYST, "\nHex: noise error.\n\n");		 status = EXIT_OS_FAILURE;	   break; }
 		case KERR_H_LOADER_FRA: { (void)dprintf(KSYST, "\nHex: framing error.\n\n");	 status = EXIT_OS_FAILURE;	   break; }
 		case KERR_H_LOADER_PAR: { (void)dprintf(KSYST, "\nHex: parity error.\n\n");		 status = EXIT_OS_FAILURE;	   break; }
+		case KERR_H_LOADER_HEX: { (void)dprintf(KSYST, "\nHex: not a hex digit.\n\n");	 status = EXIT_OS_FAILURE;	   break; }
 		default:				{														 status = EXIT_OS_FAILURE;	   break; }
 	}
+
+// Nothing runs from the user memory on any path that reaches here - a failed
+// download, a -norun one, a refused signature - so give it back; kept, it refused
+// every later download until a reset. The path that starts the application has
+// returned above and keeps it: the processes the application created may still
+// be running from it after its aStart returns
+
+	system_release(KMODE_READ_WRITE);
 	return (status);
 }
 
@@ -367,14 +380,17 @@ static	int32_t	local_getHexValue(uint8_t *value) {
 		return (status);
 	}
 
+// A character that is not a hex digit is an error: it used to contribute 0,
+// so only the record checksum stood between a corrupt stream and a bad load
+
 	if       ((byte >= '0') && (byte <= '9'))									   { *value  = (uint8_t)(aTabAB[byte - (uint8_t)'0']<<4u);						 }
 	else if (((byte >= 'A') && (byte <= 'F')) || ((byte >= 'a') && (byte <= 'f'))) { *value  = (uint8_t)(aTabAB[(byte & (uint8_t)(~0x20u)) - (uint8_t)'0']<<4u); }
-	else { ; }
+	else { return (KERR_H_LOADER_HEX); }
 
 	status = local_getByte(&byte);  if (status != KERR_H_LOADER_NOT) { return (status); }
 	if       ((byte >= '0') && (byte <= '9'))									   { *value += (uint8_t)(aTabAB[byte - (uint8_t)'0']);							 }
 	else if (((byte >= 'A') && (byte <= 'F')) || ((byte >= 'a') && (byte <= 'f'))) { *value += (uint8_t)(aTabAB[(byte & (uint8_t)(~0x20u)) - (uint8_t)'0']);	 }
-	else { ; }
+	else { return (KERR_H_LOADER_HEX); }
 
 	return (KERR_H_LOADER_NOT);
 }
@@ -491,22 +507,38 @@ static	int32_t	local_getData(const uint8_t *counter, uint8_t *checksum, uint8_t 
 }
 
 /*
- * \brief local_checkSignature
+ * \brief local_isApplication
  *
- * Search for the signature string, which should also be within the loaded application.
- * If the application has the same signature, launching it may be dangerous, as the
- * function entry-points will no longer be matching.
+ * - Verify that the user memory holds the application the download announced
+ *   (the same check as the run tool makes)
+ *   - the header at the start of the user memory is marked KMEMU
+ *   - the entry point it declares is the start address of the download
+ *   - its length fits in the user memory
+ *   - the system signature lies inside the application itself: a signature
+ *     from another system means the entry points no longer match, and SRAM
+ *     keeps its content across resets, so a stale copy may sit anywhere else
  *
  */
-static	bool	local_checkSignature(void) {
-			size_t		ln, i = 0u;
-	const	uint8_t		*ptr = (uint8_t *)linker_stUMemo;
-	const	char_t		*signature;
+static	bool	local_isApplication(int32_t (*code)(uint32_t argc, const char_t *argv[])) {
+			uKOS_header_t	header;
+			size_t			ln, i = 0u;
+	const	uint8_t			*ptr = (const uint8_t *)linker_stUMemo;
+	const	char_t			*signature;
+
+	memcpy(&header, (const void *)linker_stUMemo, sizeof(header));
+
+	if ((code == nullptr) || (header.oMemLocation != KMEMU) || (header.oStart != code)) {
+		return (false);
+	}
+
+	if ((header.oLnApplication == 0u) || (header.oLnApplication > (uintptr_t)linker_lnUMemo)) {
+		return (false);
+	}
 
 	system_getSystemSignature(&signature);
 
-	for (ln = (size_t)linker_lnUMemo; ln > 0u; --ln ) {
-		if (*ptr == signature[i]) {
+	for (ln = (size_t)header.oLnApplication; ln > 0u; --ln) {
+		if (*ptr == (uint8_t)signature[i]) {
 			i++;
 			if (*ptr == 0u) {
 				return (true);
@@ -514,7 +546,10 @@ static	bool	local_checkSignature(void) {
 
 		}
 		else {
-			i = 0u;
+
+// A mismatch may still be the first character of the signature
+
+			i = (*ptr == (uint8_t)signature[0]) ? (1u) : (0u);
 		}
 		ptr++;
 	}

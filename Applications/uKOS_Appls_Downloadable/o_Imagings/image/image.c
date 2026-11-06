@@ -1,10 +1,10 @@
 /*
 ; image.
 ; ======
-
+;
 ; SPDX-License-Identifier: MIT
 ; SPDX-FileCopyrightText: 2025-2026 Edo. Franzi
-
+;
 ;------------------------------------------------------------------------
 ; Author:	Edo. Franzi		The 2025-01-01
 ; Modifs:
@@ -124,7 +124,7 @@ static	uint32_t	vW, vH;
 
 		void	TinyUSB_video_init(void);
 		void	TinyUSB_video_getImageSize(uint32_t *w, uint32_t *h);
-		void	TinyUSB_video_sendImage(uint8_t *image, uint32_t w, uint32_t h);
+		void	TinyUSB_video_sendImage(uint8_t *image, uint32_t w, uint32_t h, void (*callBack)(const void *argument), const void *argument);
 static	void	local_initialiseYUY2(uint8_t *output, uint32_t w, uint32_t h);
 static	void	local_convertToYUY2(const uint8_t *input, uint8_t *output, uint32_t w, uint32_t h);
 static	void	local_transfer(void);
@@ -137,11 +137,9 @@ static	void	local_transfer(void);
  *
  */
 [[noreturn]]
-static	void	aProcess_acquisition(const void *argument) {
+static	void	aProcess_acquisition([[maybe_unused]] const void *argument) {
 	imagerCnf_t	configureIMG0;
 	mutx_t			*mutex;
-
-	UNUSED(argument);
 
 	if (kern_createSemaphore(aStrAcquisition, 0, 1, &vSemaphore_IM) != KERR_KERN_NOERR) { LOG(KFATAL_USER, "Create sema G"); exit(EXIT_OS_FAILURE); }
 
@@ -198,11 +196,9 @@ static	void	aProcess_acquisition(const void *argument) {
  *
  */
 [[noreturn]]
-static	void	aProcess_send(const void *argument) {
+static	void	aProcess_send([[maybe_unused]] const void *argument) {
 	uint8_t		*imageGray, *imageYUY2;
 	mutx_t		*mutex;
-
-	UNUSED(argument);
 
 	PRIVILEGE_ELEVATE;
 
@@ -227,7 +223,7 @@ static	void	aProcess_send(const void *argument) {
 			local_convertToYUY2(imageGray, imageYUY2, vW, vH);
 			kern_unlockMutex(mutex);
 
-			TinyUSB_video_sendImage(imageYUY2, vW, vH);
+			TinyUSB_video_sendImage(imageYUY2, vW, vH, nullptr, nullptr);
 			led_toggle(KLED_1);
 		}
 		else {
@@ -254,9 +250,6 @@ MAIN_ENTRY(argc, argv[]) {
 	STRG_LOC_CONST(aStrText_acquisition[]) = "Process Acquisition.                      (c) EFr-2026";
 	STRG_LOC_CONST(aStrIden_send[])		   = "Process_Send_Image";
 	STRG_LOC_CONST(aStrText_send[])		   = "Process Send Image.                       (c) EFr-2026";
-
-	UNUSED(argc);
-	UNUSED(argv);
 
 // Specifications for the processes
 

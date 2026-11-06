@@ -1,10 +1,10 @@
 /*
 ; cdc1.
 ; =====
-
+;
 ; SPDX-License-Identifier: MIT
 ; SPDX-FileCopyrightText: 2025-2026 Edo. Franzi
-
+;
 ;------------------------------------------------------------------------
 ; Author:	Edo. Franzi		The 2025-01-01
 ; Modifs:
@@ -243,6 +243,24 @@ extern	int32_t	cdc1_getIdSemaphore(uint8_t semaphore, char_t **identifier);
  *
  */
 extern	int32_t	cdc1_flush(void);
+
+/*!
+ * \brief Is the cdc1 connected
+ *
+ * Call example in C:
+ *
+ * \code{.c}
+ * int32_t    status;
+ *
+ *    status = cdc1_isConnected();
+ * \endcode
+ *
+ * \return		KERR_SERIAL_NOERR	OK
+ * \return		KERR_SERIAL_NOTCO	The device is not connected
+ * \return		KERR_SERIAL_GEERR	General error
+ *
+ */
+extern	int32_t	cdc1_isConnected(void);
 
 #if (defined(__cplusplus))
 }

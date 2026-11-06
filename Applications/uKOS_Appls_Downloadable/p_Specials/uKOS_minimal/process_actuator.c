@@ -1,10 +1,10 @@
 /*
 ; process_actuator.
 ; =================
-
+;
 ; SPDX-License-Identifier: MIT
 ; SPDX-FileCopyrightText: 2025-2026 Edo. Franzi
-
+;
 ;------------------------------------------------------------------------
 ; Author:	Edo. Franzi		The 2025-01-01
 ; Modifs:
@@ -58,7 +58,7 @@ extern	mbox_t	*vQueue_dispatcher;
 
 // Prototypes
 
-static	void	aProcess(const void *argument);
+static	void	aProcess([[maybe_unused]] const void *argument);
 
 /*
  * \brief Install & launch the process
@@ -98,11 +98,9 @@ bool	installaProcess_actuator(void) {
  *
  */
 [[noreturn]]
-static	void	aProcess(const void *argument) {
+static	void	aProcess([[maybe_unused]] const void *argument) {
 	uint8_t		motorPosition = 0x00u;
 	uintptr_t	message_actuator;
-
-	UNUSED(argument);
 
 	while (vQueue_dispatcher == nullptr) { kern_suspendProcess(1u); }
 

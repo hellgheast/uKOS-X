@@ -1,9 +1,9 @@
 # makefile.
 # =========
-
+#
 # SPDX-License-Identifier: MIT
 # SPDX-FileCopyrightText: 2025-2026 Edo. Franzi
-
+#
 #------------------------------------------------------------------------
 # Author:	Edo. Franzi		The 2025-01-01
 # Modifs:
@@ -47,7 +47,7 @@
 
 PROJECT			=  team
 
-DISPLAY			?= TFT_2_4_Inches
+DISPLAY			=  TFT_2_4_Inches
 PATH_LVGL		=  $(PATH_UKOS)/Third_Parties/LVGL
 
 # Target & Infrastructure
@@ -61,8 +61,8 @@ SOC				=  K210
 CORE			=  RV64IMAFDC
 OPTIMISATION	=  -Os
 
+CFLAGS			+= -isystem $(PATH_LVGL)/LVGL-current
 CFLAGS			+= -I$(PATH_LVGL)/Library/$(DISPLAY)
 CFLAGS			+= -I$(PATH_LVGL)/Library/$(DISPLAY)/$(CORE)
-CFLAGS			+= -isystem $(PATH_LVGL)/LVGL-current
 
 include ../../../../Mkfiles/common.mk

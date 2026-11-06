@@ -1,10 +1,10 @@
 /*
 ; sdcard.
 ; =======
-
+;
 ; SPDX-License-Identifier: MIT
 ; SPDX-FileCopyrightText: 2025-2026 Edo. Franzi
-
+;
 ;------------------------------------------------------------------------
 ; Author:	Edo. Franzi		The 2025-01-01
 ; Modifs:
@@ -150,9 +150,7 @@ static	void	aTest_5(void);
  *
  */
 [[noreturn]]
-static	void	aProcess_0(const void *argument) {
-
-	UNUSED(argument);
+static	void	aProcess_0([[maybe_unused]] const void *argument) {
 
 	while (true) {
 		kern_suspendProcess(1000u);
@@ -233,7 +231,7 @@ static	void	aTest_0(void) {
 	uint32_t	i, j, n;
 	uint8_t		*buffer;
 
-	buffer = (uint8_t *)memo_malloc(KMEMO_ALIGN_8, (KSDCARD_SZ_SECTOR * sizeof(uint8_t)), "sdcard");
+	buffer = (uint8_t *)memo_malloc(KMEMO_ALIGN_8, (KT0_NB_SECTORS * KSDCARD_SZ_SECTOR * sizeof(uint8_t)), "sdcard");
 	if (buffer == nullptr) {
 		LOG(KFATAL_USER, "Out of memory");
 		exit(EXIT_OS_FAILURE);
@@ -248,6 +246,7 @@ static	void	aTest_0(void) {
 
 		status = sdcard_read(buffer, KSDCARD_SZ_SECTOR, (KT0_INIT_SECTOR + n));
 		if (status != KERR_STORAGE_NOERR) {
+			(void)dprintf(KSYST, "Read problem\n");
 			memo_free(buffer);
 			LOG(KFATAL_USER, "Read problem");
 			exit(EXIT_OS_FAILURE);
@@ -275,9 +274,9 @@ static	void	aTest_0(void) {
  *
  */
 static	void	aTest_1(void) {
-	#define		KT1_NB_SECTORS	10
+	#define		KT1_NB_SECTORS	10u
 	int32_t		status;
-	uint32_t	sector = 0;
+	uint32_t	sector = 0u;
 	uint8_t		*buffer;
 
 	buffer = (uint8_t *)memo_malloc(KMEMO_ALIGN_8, (KT1_NB_SECTORS * KSDCARD_SZ_SECTOR * sizeof(uint8_t)), "sdcard");
@@ -291,18 +290,19 @@ static	void	aTest_1(void) {
 
 // Read all the sectors (about. 20h)
 
-		if ((sector % 1000) == 0) {
+		if ((sector % 1000u) == 0u) {
 			(void)dprintf(KSYST, "sector %"PRIu32"\n", sector);
 		}
 
 		status = sdcard_read(buffer, (KT1_NB_SECTORS * KSDCARD_SZ_SECTOR), sector);
 		if (status != KERR_STORAGE_NOERR) {
+			(void)dprintf(KSYST, "Read problem\n");
 			memo_free(buffer);
 			LOG(KFATAL_USER, "Read problem");
 			exit(EXIT_OS_FAILURE);
 		}
 
-		sector += 10;
+		sector += 10u;
 	}
 }
 
@@ -315,10 +315,10 @@ static	void	aTest_1(void) {
  *
  */
 static	void	aTest_2(void) {
-	#define		KT2_NB_BYTES	(KSDCARD_SZ_SECTOR * 2)
-	#define		KT2_NB_SECTORS	2
+	#define		KT2_NB_BYTES	(KSDCARD_SZ_SECTOR * 2u)
+	#define		KT2_NB_SECTORS	2u
 	int32_t		status;
-	uint32_t	i, j, s, sector = 0;
+	uint32_t	i, j, s, sector = 0u;
 	uint8_t		*wBuffer;
 	uint8_t		*rBuffer;
 
@@ -337,9 +337,9 @@ static	void	aTest_2(void) {
 
 // Initialise the buffer
 
-	for (i = 0; i < KSDCARD_SZ_SECTOR; i++) {
-		*(wBuffer + i)						 = 0x55;
-		*(wBuffer + KSDCARD_SZ_SECTOR + i) = 0xAA;
+	for (i = 0u; i < KSDCARD_SZ_SECTOR; i++) {
+		*(wBuffer + i)					   = 0x55u;
+		*(wBuffer + KSDCARD_SZ_SECTOR + i) = 0xAAu;
 	}
 
 	while (true) {
@@ -347,12 +347,13 @@ static	void	aTest_2(void) {
 
 // Write/read 2 consecutive sectors
 
-		kern_suspendProcess(1000);
+		kern_suspendProcess(1000u);
 
 		(void)dprintf(KSYST, "Sector = %"PRIu32"\n\n", sector);
 
 		status = sdcard_write(wBuffer, KT2_NB_BYTES, sector);
 		if (status != KERR_STORAGE_NOERR) {
+			(void)dprintf(KSYST, "Write problem\n");
 			memo_free(wBuffer);
 			memo_free(rBuffer);
 			LOG(KFATAL_USER, "Write problem");
@@ -361,16 +362,17 @@ static	void	aTest_2(void) {
 
 		status = sdcard_read(rBuffer, KT2_NB_BYTES, sector);
 		if (status != KERR_STORAGE_NOERR) {
+			(void)dprintf(KSYST, "Read problem\n");
 			memo_free(wBuffer);
 			memo_free(rBuffer);
 			LOG(KFATAL_USER, "Read problem");
 			exit(EXIT_OS_FAILURE);
 		}
 
-		for (s = 0; s < KT2_NB_SECTORS; s++) {
+		for (s = 0u; s < KT2_NB_SECTORS; s++) {
 			(void)dprintf(KSYST, "s = %"PRIu32"\n", s);
-			for (j = 0; j < KSDCARD_SZ_SECTOR; j += 16) {
-				for (i = 0; i < 16; i++) {
+			for (j = 0u; j < KSDCARD_SZ_SECTOR; j += 16u) {
+				for (i = 0u; i < 16u; i++) {
 					(void)dprintf(KSYST, "0x%02X ", *(rBuffer + (KSDCARD_SZ_SECTOR * s) + i + j));
 				}
 				(void)dprintf(KSYST, "\n");
@@ -398,7 +400,7 @@ static	void	aTest_3(void) {
 
 // Read the sdcard sdCard
 
-		kern_suspendProcess(2000);
+		kern_suspendProcess(2000u);
 
 		sdcard_initialise(&sdCard);
 
@@ -451,9 +453,9 @@ static	void	aTest_3(void) {
  *
  */
 static	void	aTest_4(void) {
-	#define		KT4_NB_SECTORS	100
+	#define		KT4_NB_SECTORS	100u
 	int32_t		status;
-	uint32_t	i, j, k, sector = 0;
+	uint32_t	i, j, k, sector = 0u;
 	uint64_t	tStamp[2];
 	uint8_t		*wBuffer;
 	uint8_t		*rBuffer;
@@ -471,14 +473,14 @@ static	void	aTest_4(void) {
 		exit(EXIT_OS_FAILURE);
 	}
 
-	k = 0;
+	k = 0u;
 	while (true) {
 		led_toggle(KLED_1);
 
 // Initialise the buffer
 
-		for (i = 0; i < KT4_NB_SECTORS; i++) {
-			for (j = 0; j < KSDCARD_SZ_SECTOR; j++) {
+		for (i = 0u; i < KT4_NB_SECTORS; i++) {
+			for (j = 0u; j < KSDCARD_SZ_SECTOR; j++) {
 				*(wBuffer + (i * KSDCARD_SZ_SECTOR) + j) = (uint8_t)k;
 				k++;
 			}
@@ -490,6 +492,7 @@ static	void	aTest_4(void) {
 		status = sdcard_write(wBuffer, (KT4_NB_SECTORS * KSDCARD_SZ_SECTOR), sector);
 		kern_readTickCount(&tStamp[1]);
 		if (status != KERR_STORAGE_NOERR) {
+			(void)dprintf(KSYST, "Write problem\n");
 			memo_free(wBuffer);
 			memo_free(rBuffer);
 			LOG(KFATAL_USER, "Write problem");
@@ -502,6 +505,7 @@ static	void	aTest_4(void) {
 		status = sdcard_read(rBuffer, (KT4_NB_SECTORS * KSDCARD_SZ_SECTOR), sector);
 		kern_readTickCount(&tStamp[1]);
 		if (status != KERR_STORAGE_NOERR) {
+			(void)dprintf(KSYST, "Read problem\n");
 			memo_free(wBuffer);
 			memo_free(rBuffer);
 			LOG(KFATAL_USER, "read problem");
@@ -514,9 +518,10 @@ static	void	aTest_4(void) {
 
 // Test if the buffers are equals
 
-		for (i = 0; i < KT4_NB_SECTORS; i++) {
-			for (j = 0; j < KSDCARD_SZ_SECTOR; j++) {
+		for (i = 0u; i < KT4_NB_SECTORS; i++) {
+			for (j = 0u; j < KSDCARD_SZ_SECTOR; j++) {
 				if (*(wBuffer + (i * KSDCARD_SZ_SECTOR) + j) != *(rBuffer + (i * KSDCARD_SZ_SECTOR) + j)) {
+					(void)dprintf(KSYST, "Coherency problem\n");
 					LOG(KFATAL_USER, "Coherency problem!!");
 					exit(EXIT_OS_FAILURE);
 				}
@@ -536,7 +541,7 @@ static	void	aTest_4(void) {
  */
 static	void	aTest_5(void) {
 	int32_t		status;
-	float64_t	*ref, *res;
+	float64_t	*ref_f, *res_f;
 
 	VAR_DECLARED_ALIGN(static uint8_t vBufRef[KSDCARD_SZ_SECTOR], 8);
 	VAR_DECLARED_ALIGN(static uint8_t vBufRes[KSDCARD_SZ_SECTOR], 8);
@@ -548,37 +553,39 @@ static	void	aTest_5(void) {
 // Ignore the GCC diagnostic
 //
 	#pragma GCC diagnostic	ignored	"-Wcast-align"
-	ref = (float64_t *)&vBufRef[0];
-	res = (float64_t *)&vBufRes[0];
+	ref_f = (float64_t *)&vBufRef[0];
+	res_f = (float64_t *)&vBufRes[0];
 
 // Restore the GCC diagnostic
 //
 	#pragma GCC	diagnostic	pop
 
-	*(ref + 0) = 3.141516;
-	*(ref + 1) = 1.843256;
+	*(ref_f + 0) = 3.141516;
+	*(ref_f + 1) = 1.843256;
 
 	while (true) {
 		led_toggle(KLED_1);
-		kern_suspendProcess(1000);
+		kern_suspendProcess(1000u);
 
 // Write 2 float64 numbers on the sector 0
 
-		status = sdcard_write(vBufRef, 10, 0);
+		status = sdcard_write(vBufRef, 10u, 0u);
 		if (status != KERR_STORAGE_NOERR) {
+			(void)dprintf(KSYST, "Write problem\n");
 			LOG(KFATAL_USER, "Write problem");
 			exit(EXIT_OS_FAILURE);
 		}
 
 // Read 2 float64 numbers from the sector 0
 
-		status = sdcard_read(vBufRes, 10, 0);
+		status = sdcard_read(vBufRes, 10u, 0u);
 		if (status != KERR_STORAGE_NOERR) {
+			(void)dprintf(KSYST, "Read problem\n");
 			LOG(KFATAL_USER, "Read problem");
 			exit(EXIT_OS_FAILURE);
 		}
 
-		(void)dprintf(KSYST, "%6.3f %6.3f %6.3f %6.3f\n", *(ref + 0), *(ref + 1), *(res + 0), *(res + 1));
+		(void)dprintf(KSYST, "%6.3f %6.3f %6.3f %6.3f\n", *(ref_f + 0), *(ref_f + 1), *(res_f + 0), *(res_f + 1));
 	}
 }
 
@@ -601,9 +608,6 @@ MAIN_ENTRY(argc, argv[]) {
 	STRG_LOC_CONST(aStrIden_1[]) = "Process_User_1";
 	STRG_LOC_CONST(aStrText_0[]) = "Process user 0.                           (c) EFr-2026";
 	STRG_LOC_CONST(aStrText_1[]) = "Process user 1.                           (c) EFr-2026";
-
-	UNUSED(argc);
-	UNUSED(argv);
 
 // Specifications for the processes
 
@@ -634,7 +638,7 @@ MAIN_ENTRY(argc, argv[]) {
 	pack.oReleasePack = &releasePack;
 
 	if (kern_createProcess(&specification_0, nullptr,  &process_0) != KERR_KERN_NOERR) { LOG(KFATAL_USER, "Create proc"); return (EXIT_OS_FAILURE); }
-	if (kern_createProcess(&specification_1, &pack, &process_1) != KERR_KERN_NOERR) { LOG(KFATAL_USER, "Create proc"); return (EXIT_OS_FAILURE); }
+	if (kern_createProcess(&specification_1, &pack, &process_1)	   != KERR_KERN_NOERR) { LOG(KFATAL_USER, "Create proc"); return (EXIT_OS_FAILURE); }
 
 // Let the time to the process "aProcess_1" to run
 

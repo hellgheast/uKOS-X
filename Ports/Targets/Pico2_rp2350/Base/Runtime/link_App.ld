@@ -1,10 +1,10 @@
 /*
 ; link_App.
 ; =========
-
+;
 ; SPDX-License-Identifier: MIT
 ; SPDX-FileCopyrightText: 2025-2026 Edo. Franzi
-
+;
 ;------------------------------------------------------------------------
 ; Author:	Edo. Franzi		The 2025-01-01
 ; Modifs:
@@ -76,8 +76,8 @@
 ENTRY(aStart)
 
 MEMORY {
-	prgm_code (rx)	: ORIGIN = 0x20050000, LENGTH = 116K
-	prgm_data (rwx)	: ORIGIN = 0x2006D000, LENGTH = 20K
+	prgm_code (rx)	: ORIGIN = 0x20050000, LENGTH = 124K
+	prgm_data (rwx)	: ORIGIN = 0x2006F000, LENGTH = 12K
 }
 
 INCLUDE		application.ld

@@ -1,10 +1,10 @@
 /*
 ; mutex.
 ; ======
-
+;
 ; SPDX-License-Identifier: MIT
 ; SPDX-FileCopyrightText: 2025-2026 Edo. Franzi
-
+;
 ;------------------------------------------------------------------------
 ; Author:	Edo. Franzi		The 2025-01-01
 ; Modifs:
@@ -67,12 +67,12 @@ STRG_LOC_CONST(aStrHelp[])		  = "Show all created mutexes\n"
 
 									"Module built on "__DATE__"  "__TIME__" (c) EFr-2026\n\n";
 
-static	int32_t		prgm(uint32_t argc, const char_t *argv[]);
+static	int32_t		prgm([[maybe_unused]] uint32_t argc, [[maybe_unused]] const char_t *argv[]);
 
 MODULE(
 	Mutex,										// Module name (the first letter has to be upper case)
 	KID_FAM_CLI,								// Family (defined in the module.h)
-	KNUM_SEMAPHORE,								// Module identifier (defined in the module.h)
+	KNUM_MUTEX,									// Module identifier (defined in the module.h)
 	nullptr,									// Address of the initialisation code (early pre-init)
 	prgm,										// Address of the code (prgm for tools, aStart for applications, nullptr for libraries)
 	nullptr,									// Address of the clean code (clean the module)
@@ -92,16 +92,12 @@ static	void	local_compose(const char_t *identifier, const char_t **idSpacer);
  * \brief Main entry point
  *
  */
-static	int32_t	prgm(uint32_t argc, const char_t *argv[]) {
+static	int32_t	prgm([[maybe_unused]] uint32_t argc, [[maybe_unused]] const char_t *argv[]) {
 			int32_t		status, counter;
 			uint32_t	core;
 			uint16_t	i, j, k, nbAttached;
-			enum		{ KERR_NOT, KERR_MEM } error = KERR_NOT;
 			proc_t		*process;
 	const	char_t		*idBuffer[KNB_CORES][KKERN_NB_PROCESSES], *identifier, *idSpacerI, *owner, *idSpacerO;
-
-	UNUSED(argc);
-	UNUSED(argv);
 
 	(void)dprintf(KSYST, "List of the system mutexes.\n");
 
@@ -123,8 +119,8 @@ static	int32_t	prgm(uint32_t argc, const char_t *argv[]) {
 
 				counter = vKern_mutx[core][i].oCounter;
 
-				if (vKern_mutx[core][i].oOwner == nullptr) { owner = "";																															   }
-				else									{ owner = (vKern_mutx[core][i].oOwner == KKERN_HANDLE_FROM_ISR) ? ("From ISR") : (vKern_mutx[core][i].oOwner->oSpecification.oIdentifier); }
+				if (vKern_mutx[core][i].oOwner == nullptr) { owner = "";																															  }
+				else									   { owner = (vKern_mutx[core][i].oOwner == KKERN_HANDLE_FROM_ISR) ? ("From ISR") : (vKern_mutx[core][i].oOwner->oSpecification.oIdentifier); }
 				local_compose(owner, &idSpacerO);
 
 // Scann the mutex list and collect
@@ -133,8 +129,13 @@ static	int32_t	prgm(uint32_t argc, const char_t *argv[]) {
 				nbAttached = 0u;
 				if (vKern_mutx[core][i].oList.oNbElements > 0u) {
 					process = vKern_mutx[core][i].oList.oFirst;
+
+// idBuffer holds KKERN_NB_PROCESSES names per core: never more than that, and
+// never past the end of the chain, whatever oNbElements says
+
 					k = vKern_mutx[core][i].oList.oNbElements;
-					for (j = 0u; j < k; j++) {
+					k = (k > KKERN_NB_PROCESSES) ? ((uint16_t)KKERN_NB_PROCESSES) : (k);
+					for (j = 0u; (j < k) && (process != nullptr); j++) {
 
 // Save the names of all the attached
 // processes
@@ -143,7 +144,7 @@ static	int32_t	prgm(uint32_t argc, const char_t *argv[]) {
 						process = process->oObject.oForward;
 					}
 					nbAttached = j;
-					}
+				}
 				kern_criticalSection(KEXIT_CRITICAL);
 
 				(void)dprintf(KSYST, "%2"PRIu16"  %s%s   %3"PRId32"", i, identifier, idSpacerI, counter);
@@ -163,11 +164,11 @@ static	int32_t	prgm(uint32_t argc, const char_t *argv[]) {
 		}
 	}
 
-	switch (error) {
-		case KERR_NOT: { (void)dprintf(KSYST, "\n");					 status = EXIT_OS_SUCCESS_CLI; break; }
-		case KERR_MEM: { (void)dprintf(KSYST, "Not enough memory.\n\n"); status = EXIT_OS_FAILURE;     break; }
-		default:	   {												 status = EXIT_OS_FAILURE;     break; }
-	}
+// Nothing here allocates or can fail: the former "Not enough memory." arm
+// was never reachable
+
+	(void)dprintf(KSYST, "\n");
+	status = EXIT_OS_SUCCESS_CLI;
 
 	PRIVILEGE_RESTORE;
 	return (status);
@@ -194,7 +195,7 @@ static	void	local_compose(const char_t *identifier, const char_t **idSpacer) {
 	size_t	len;
 
 // --------------------------------------|------------------------------|---
-//                                      "Semaphore_to_count_the_number_xy";
+//										"Semaphore_to_count_the_number_xy";
 	static	const	char_t	aSpacer[] = "                                ";
 
 	len = strlen(identifier);

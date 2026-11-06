@@ -1,10 +1,10 @@
 /*
 ; sdcard.
 ; =======
-
+;
 ; SPDX-License-Identifier: MIT
 ; SPDX-FileCopyrightText: 2025-2026 Edo. Franzi
-
+;
 ;------------------------------------------------------------------------
 ; Author:	Edo. Franzi		The 2025-01-01
 ; Modifs:
@@ -85,7 +85,7 @@ static	mutx_t		*vMutex_Reserve[KNB_CORES];
 
 extern	int32_t		stub_sdcard_init(void);
 extern	int32_t		stub_sdcard_initialise(sdcard_specification_t *specification);
-extern	int32_t		stub_sdcard_readStatus(void);
+extern	int32_t		stub_sdcard_isPresent(void);
 extern	int32_t		stub_sdcard_read(const sdcard_specification_t *specification, uint8_t *buffer, uint8_t nbSectors, uint32_t sector);
 extern	int32_t		stub_sdcard_write(const sdcard_specification_t *specification, const uint8_t *buffer, uint8_t nbSectors, uint32_t sector);
 extern	int32_t		stub_sdcard_ioctl(storageIoctl_t command, void *buffer);
@@ -117,11 +117,9 @@ static	int32_t		local_sdcard_write(const sdcard_specification_t *specification, 
  * \return		KERR_STORAGE_CHBSY	The manager is busy
  *
  */
-int32_t	sdcard_reserve(reserveMode_t reserveMode, uint32_t timeout) {
+int32_t	sdcard_reserve([[maybe_unused]] reserveMode_t reserveMode, uint32_t timeout) {
 	int32_t		status;
 	uint32_t	core;
-
-	UNUSED(reserveMode);
 
 	core = GET_RUNNING_CORE;
 
@@ -156,11 +154,9 @@ int32_t	sdcard_reserve(reserveMode_t reserveMode, uint32_t timeout) {
  * \return		KERR_STORAGE_CAREL	Cannot release the manager
  *
  */
-int32_t	sdcard_release(reserveMode_t reserveMode) {
+int32_t	sdcard_release([[maybe_unused]] reserveMode_t reserveMode) {
 	int32_t		status;
 	uint32_t	core;
-
-	UNUSED(reserveMode);
 
 	core = GET_RUNNING_CORE;
 
@@ -187,7 +183,7 @@ int32_t	sdcard_release(reserveMode_t reserveMode) {
  * int32_t                   status;
  * sdcard_specification_t    sdcard;
  *
- *    status = sdcard_initialise(&sdCard);
+ *    status = sdcard_initialise(&sdcard);
  *    if (status != KERR_STORAGE_NOERR) {
  *        exit(EXIT_OS_FAILURE);
  *    }
@@ -216,14 +212,14 @@ int32_t	sdcard_initialise(sdcard_specification_t *specification) {
 }
 
 /*
- * \brief Read the status of the sdcard
+ * \brief Is the sdcard present
  *
  * Call example in C:
  *
  * \code{.c}
  * int32_t    status;
  *
- *    status = sdcard_readStatus();
+ *    status = sdcard_isPresent();
  * \endcode
  *
  * \return		KERR_STORAGE_NOERR	OK
@@ -231,14 +227,14 @@ int32_t	sdcard_initialise(sdcard_specification_t *specification) {
  * \return		KERR_STORAGE_NODEV	No sdcard
  *
  */
-int32_t	sdcard_readStatus(void) {
+int32_t	sdcard_isPresent(void) {
 	int32_t		status;
 
 	PRIVILEGE_ELEVATE;
 	status = local_init();
 	if (status != KERR_STORAGE_NOERR) { PRIVILEGE_RESTORE; return (status); }
 
-	status = stub_sdcard_readStatus();
+	status = stub_sdcard_isPresent();
 	PRIVILEGE_RESTORE;
 	return (status);
 }
@@ -324,7 +320,7 @@ int32_t	sdcard_read(uint8_t *buffer, uint32_t size, uint32_t sector) {
 			return (KERR_STORAGE_TRANT);
 		}
 
-		for (i = 0; i < nbBytesLastSector; i++) {
+		for (i = 0u; i < nbBytesLastSector; i++) {
 			*memory = lastSectorBuffer[i];
 			memory++;
 		}

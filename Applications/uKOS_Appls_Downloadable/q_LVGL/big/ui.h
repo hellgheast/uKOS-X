@@ -1,10 +1,10 @@
 /*
 ; ui.
 ; ===
-
+;
 ; SPDX-License-Identifier: MIT
 ; SPDX-FileCopyrightText: 2025-2026 Edo. Franzi
-
+;
 ;------------------------------------------------------------------------
 ; Author:	Edo. Franzi		The 2025-01-01
 ; Modifs:
@@ -74,6 +74,7 @@
 
 #define	KARC_DIAMETER		200u										// Arc diameter
 #define	KARC_MARGIN			20u											// Arc margin
+#define	KARC_WIDTH			5											// Arc width
 #define	KARC_POS_X			(KLCD_WIDTH - KARC_DIAMETER - KARC_MARGIN)	// X Arc
 #define	KARC_POS_Y			KARC_MARGIN									// Y Arc
 

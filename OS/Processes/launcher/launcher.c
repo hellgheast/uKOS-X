@@ -1,10 +1,10 @@
 /*
 ; launcher.
 ; =========
-
+;
 ; SPDX-License-Identifier: MIT
 ; SPDX-FileCopyrightText: 2025-2026 Edo. Franzi
-
+;
 ;------------------------------------------------------------------------
 ; Author:	Edo. Franzi		The 2025-01-01
 ; Modifs:
@@ -66,7 +66,7 @@ STRG_LOC_CONST(aStrHelp[])		  = "launcher process\n"
 
 #define	KEXECUTION_CORE		((1u<<BCORE_0) | (1u<<BCORE_1) | (1u<<BCORE_2) | (1u<<BCORE_3))
 
-static	int32_t		prgm(uint32_t argc, const char_t *argv[]);
+static	int32_t		prgm([[maybe_unused]] uint32_t argc, [[maybe_unused]] const char_t *argv[]);
 
 MODULE(
 	Launcher,						// Module name (the first letter has to be upper case)
@@ -100,11 +100,8 @@ static	void	local_process(const void *argument);
  * \brief Main entry point
  *
  */
-static	int32_t	prgm(uint32_t argc, const char_t *argv[]) {
+static	int32_t	prgm([[maybe_unused]] uint32_t argc, [[maybe_unused]] const char_t *argv[]) {
 	proc_t	*process;
-
-	UNUSED(argc);
-	UNUSED(argv);
 
 	PROCESS_STACKMALLOC(
 		0,									// Index
@@ -137,7 +134,7 @@ static	int32_t	prgm(uint32_t argc, const char_t *argv[]) {
  *
  */
 [[noreturn]]
-static	void	local_process(const void *argument) {
+static	void	local_process([[maybe_unused]] const void *argument) {
 			uint16_t		index = 0u;
 			uint32_t		core, idModule, argc = 4u;
 	const	uKOS_module_t	*module;
@@ -150,8 +147,6 @@ static	void	local_process(const void *argument) {
 										{ "alive", "50", "950", "2" },	// Core 2
 										{ "alive", "50", "950", "3" }	// Core 3
 									};
-
-	UNUSED(argument);
 
 	core = GET_RUNNING_CORE;
 	LOG(KINFO_SYSTEM, "launcher: launching all the processes");
@@ -171,17 +166,13 @@ static	void	local_process(const void *argument) {
 
 	index = 0u;
 	while (system_getModuleFamily((uint8_t)KID_FAM_PROCESSES, &idModule, &index, &module) == KERR_SYSTEM_NOERR) {
-		if (!((idModule == (uint32_t)KID_ALIVE) || (idModule == (uint32_t)KID_LAUNCHER))) {
-			if (((1u<<core) & module->oExecutionCore) != 0u) {
-				module->oExecution(0u, nullptr);
-			}
+		if ((idModule != (uint32_t)KID_ALIVE) && (idModule != (uint32_t)KID_LAUNCHER) && (((1u << core) & module->oExecutionCore) != 0u)) {
+			module->oExecution(0u, nullptr);
 		}
 		index++;
 	}
-	if (system_getModuleId((uint32_t)KID_ALIVE, &index, &module) == KERR_SYSTEM_NOERR) {
-		if (((1u<<core) & module->oExecutionCore) != 0) {
-			module->oExecution(argc, &vArgv_alive[core][0]);
-		}
+	if ((system_getModuleId((uint32_t)KID_ALIVE, &index, &module) == KERR_SYSTEM_NOERR) && (((1u<<core) & module->oExecutionCore) != 0u)) {
+		module->oExecution(argc, &vArgv_alive[core][0]);
 	}
 	LOG(KINFO_SYSTEM, "launcher: all process launched");
 
@@ -190,10 +181,8 @@ static	void	local_process(const void *argument) {
 
 	index = 0u;
 	while (system_getModuleFamily((uint8_t)KID_FAM_DAEMONS, &idModule, &index, &module) == KERR_SYSTEM_NOERR) {
-		if ((idModule != (uint32_t)KID_IDLE)) {
-			if (((1u<<core) & module->oExecutionCore) != 0) {
-				module->oExecution(0u, nullptr);
-			}
+		if (((idModule != (uint32_t)KID_IDLE)) && (((1u<<core) & module->oExecutionCore) != 0u)) {
+			module->oExecution(0u, nullptr);
 		}
 		index++;
 	}

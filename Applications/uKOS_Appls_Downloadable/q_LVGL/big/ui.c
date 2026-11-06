@@ -1,10 +1,10 @@
 /*
 ; ui.
 ; ===
-
+;
 ; SPDX-License-Identifier: MIT
 ; SPDX-FileCopyrightText: 2025-2026 Edo. Franzi
-
+;
 ;------------------------------------------------------------------------
 ; Author:	Edo. Franzi		The 2025-01-01
 ; Modifs:
@@ -112,10 +112,8 @@ static	void	local_DrawText_1(void) {
 	kern_unlockMutex(vLVGL_API[core]);
 }
 
-static	void	local_colorL1_cb(lv_timer_t *time) {
+static	void	local_colorL1_cb([[maybe_unused]] lv_timer_t *time) {
 	uint32_t	core, color;
-
-	UNUSED(time);
 
 	core = GET_RUNNING_CORE;
 
@@ -176,10 +174,13 @@ static	void	local_DrawArc(void) {
 	kern_lockMutex(vLVGL_API[core], KWAIT_INFINITY);
 	vArc[core] = lv_arc_create(lv_screen_active());
 	lv_obj_set_size(vArc[core], KARC_DIAMETER, KARC_DIAMETER);
+	lv_obj_set_style_arc_width(vArc[core], KARC_WIDTH, LV_PART_MAIN);
+	lv_obj_set_style_arc_width(vArc[core], KARC_WIDTH, LV_PART_INDICATOR);
+
 	lv_arc_set_rotation(vArc[core], 270);
 	lv_arc_set_bg_angles(vArc[core], 0, 360);
 	lv_obj_remove_style(vArc[core], nullptr, LV_PART_KNOB);
-	lv_obj_remove_flag(vArc[core], LV_OBJ_FLAG_CLICKABLE);
+	lv_obj_set_clickable(vArc[core], false);
 	lv_obj_set_pos(vArc[core], KARC_POS_X, KARC_POS_Y);
 
 	lv_anim_init(&animation);
@@ -211,13 +212,11 @@ static	void	local_DrawRandomSquares(void) {
 	lv_timer_create(local_square_cb, 100, nullptr);
 }
 
-static	void	local_square_cb(lv_timer_t *time) {
+static	void	local_square_cb([[maybe_unused]] lv_timer_t *time) {
 			uint32_t	core, position, color;
 			int32_t		x, y, max_x, max_y;
 			lv_obj_t	*localSquare;
 	static	uint32_t	index = 0;
-
-	UNUSED(time);
 
 	core = GET_RUNNING_CORE;
 

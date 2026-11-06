@@ -1,10 +1,10 @@
 /*
 ; mpconfigport.
 ; =============
-
+;
 ; SPDX-License-Identifier: MIT
 ; SPDX-FileCopyrightText: 2025-2026 Laurent von Allmen
-
+;
 ;------------------------------------------------------------------------
 ; Author:	Laurent von Allmen	The 2025-01-01
 ; Modifs:
@@ -104,7 +104,7 @@
 #define	MICROPY_PY_SYS							(1)
 #define	MICROPY_MODULE_FROZEN_MPY				(0)
 #define	MICROPY_CPYTHON_COMPAT					(0)
-#define	MICROPY_LONGINT_IMPL					(MICROPY_LONGINT_IMPL_LONGLONG)
+#define	MICROPY_LONGINT_IMPL					(MICROPY_LONGINT_IMPL_MPZ)
 #define	MICROPY_FLOAT_IMPL						(MICROPY_FLOAT_IMPL_FLOAT)
 #define	MICROPY_PY_UBINASCII					(1)
 #define	MICROPY_PY_BUILTINS_HELP_MODULES		(1)

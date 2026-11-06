@@ -1,10 +1,10 @@
 /*
 ; model_uart_C0.
 ; ==============
-
+;
 ; SPDX-License-Identifier: MIT
 ; SPDX-FileCopyrightText: 2025-2026 Edo. Franzi
-
+;
 ;------------------------------------------------------------------------
 ; Author:	Edo. Franzi		The 2025-01-01
 ; Modifs:
@@ -176,8 +176,8 @@ static	int32_t	model_uart_configure_C0(const urtxCnf_t *configure) {
 		default:					   { BAUDRATE(UART0, UART_FREQUENCY_C0, KSERIAL_DEFAULT_BAUDRATE); break; }
 	}
 
-	vWithSemaphore_RX_C0 = ((configure->oKernSync & ((uint32_t)1u<<(uint32_t)BSERIAL_SEMAPHORE_RX)) != 0u) ? (true) : (false);
-	vWithSemaphore_TX_C0 = ((configure->oKernSync & ((uint32_t)1u<<(uint32_t)BSERIAL_SEMAPHORE_TX)) != 0u) ? (true) : (false);
+	vWithSemaphore_RX_C0 = ((configure->oKernSync & (uint8_t)(1u<<BSERIAL_SEMAPHORE_RX)) != 0u) ? (true) : (false);
+	vWithSemaphore_TX_C0 = ((configure->oKernSync & (uint8_t)(1u<<BSERIAL_SEMAPHORE_TX)) != 0u) ? (true) : (false);
 	UART_C0->UARTCR |= UART_UARTCR_UARTEN;
 	RETURN_INT_RESTORE(KERR_SERIAL_NOERR);
 }
@@ -291,6 +291,17 @@ static	int32_t	model_uart_flush_C0(void) {
 	kern_getSemaphoreById(KUART_SEMAPHORE_RX_C0, &semaphore);
 	kern_restartSemaphore(semaphore);
 	RETURN_INT_RESTORE(KERR_SERIAL_NOERR);
+}
+
+/*
+ * \brief model_uart_isConnected_C0
+ *
+ * - Is the usart connected
+ *
+ */
+static	int32_t	model_uart_isConnected_C0(void) {
+
+	return (KERR_SERIAL_NOERR);
 }
 
 // Local routines

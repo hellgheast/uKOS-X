@@ -1,10 +1,10 @@
 /*
 ; bench.
 ; ======
-
+;
 ; SPDX-License-Identifier: MIT
 ; SPDX-FileCopyrightText: 2025-2026 Edo. Franzi
-
+;
 ;------------------------------------------------------------------------
 ; Author:	Edo. Franzi		The 2025-01-01
 ; Modifs:
@@ -70,7 +70,7 @@ STRG_LOC_CONST(aStrHelp[])		  = "The CPU cores benches\n"
 
 									"Module built on "__DATE__"  "__TIME__" (c) EFr-2026\n\n";
 
-static	int32_t		prgm(uint32_t argc, const char_t *argv[]);
+static	int32_t		prgm([[maybe_unused]] uint32_t argc, [[maybe_unused]] const char_t *argv[]);
 
 MODULE(
 	Bench,										// Module name (the first letter has to be upper case)
@@ -100,12 +100,10 @@ extern	bool		bench_05(void);
  * \brief Main entry point
  *
  */
-static	int32_t	prgm(uint32_t argc, const char_t *argv[]) {
+static	int32_t	prgm([[maybe_unused]] uint32_t argc, [[maybe_unused]] const char_t *argv[]) {
+	int32_t		status = EXIT_OS_SUCCESS_CLI;
 	priority_t	priority;
 	proc_t		*process;
-
-	UNUSED(argc);
-	UNUSED(argv);
 
 	PRIVILEGE_ELEVATE;
 
@@ -117,13 +115,21 @@ static	int32_t	prgm(uint32_t argc, const char_t *argv[]) {
 	kern_getPriority(process, &priority);
 	kern_setPriority(process, KKERN_PRIORITY_HIGH_01);
 
-	if (bench_00() == false) { (void)dprintf(KSYST, "Not enough memory.\n"); return (EXIT_OS_FAILURE); }
-	if (bench_01() == false) { (void)dprintf(KSYST, "Not enough memory.\n"); return (EXIT_OS_FAILURE); }
-	if (bench_02() == false) { (void)dprintf(KSYST, "Not enough memory.\n"); return (EXIT_OS_FAILURE); }
-	if (bench_03() == false) { (void)dprintf(KSYST, "Not enough memory.\n"); return (EXIT_OS_FAILURE); }
-	if (bench_04() == false) { (void)dprintf(KSYST, "Not enough memory.\n"); return (EXIT_OS_FAILURE); }
-	if (bench_05() == false) { (void)dprintf(KSYST, "Not enough memory.\n"); return (EXIT_OS_FAILURE); }
+	if		(bench_00() == false) { status = EXIT_OS_FAILURE; }
+	else if (bench_01() == false) { status = EXIT_OS_FAILURE; }
+	else if (bench_02() == false) { status = EXIT_OS_FAILURE; }
+	else if (bench_03() == false) { status = EXIT_OS_FAILURE; }
+	else if (bench_04() == false) { status = EXIT_OS_FAILURE; }
+	else if (bench_05() == false) { status = EXIT_OS_FAILURE; }
+	else						  {							  }
+
+	if (status != EXIT_OS_SUCCESS_CLI) { (void)dprintf(KSYST, "Not enough memory.\n"); }
+
+// Give the console back with its original priority and privilege, whatever happened:
+// a failed bench used to return with both still raised, and even a successful run
+// left the console privileged, skipping every user-mode MPU check afterwards
 
 	kern_setPriority(process, priority);
-	return (EXIT_OS_SUCCESS_CLI);
+	PRIVILEGE_RESTORE;
+	return (status);
 }

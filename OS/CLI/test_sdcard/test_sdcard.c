@@ -1,10 +1,10 @@
 /*
 ; test_sdcard.
 ; ============
-
+;
 ; SPDX-License-Identifier: MIT
 ; SPDX-FileCopyrightText: 2025-2026 Edo. Franzi
-
+;
 ;------------------------------------------------------------------------
 ; Author:	Edo. Franzi		The 2025-01-01
 ; Modifs:
@@ -65,7 +65,7 @@ STRG_LOC_CONST(aStrHelp[])		  = "sdcard R/W tests\n"
 
 									"Module built on "__DATE__"  "__TIME__" (c) EFr-2026\n\n";
 
-static	int32_t		prgm(uint32_t argc, const char_t *argv[]);
+static	int32_t		prgm([[maybe_unused]] uint32_t argc, [[maybe_unused]] const char_t *argv[]);
 static	int32_t		test_sdcard_clean(uint32_t argc, const char_t *argv[]);
 
 MODULE(
@@ -109,13 +109,10 @@ static	void	local_error(uint8_t error, int32_t status, uint32_t sector, uint8_t 
  * \brief Main entry point
  *
  */
-static	int32_t	prgm(uint32_t argc, const char_t *argv[]) {
+static	int32_t	prgm([[maybe_unused]] uint32_t argc, [[maybe_unused]] const char_t *argv[]) {
 	uint32_t	core;
 	int32_t		status;
 	proc_t		*process;
-
-	UNUSED(argc);
-	UNUSED(argv);
 
 	core = GET_RUNNING_CORE;
 	vKillRequest[core] = false;
@@ -148,11 +145,8 @@ static	int32_t	prgm(uint32_t argc, const char_t *argv[]) {
  *		- Free all the ressources
  *
  */
-static	int32_t	test_sdcard_clean(uint32_t argc, const char_t *argv[]) {
+static	int32_t	test_sdcard_clean([[maybe_unused]] uint32_t argc, [[maybe_unused]] const char_t *argv[]) {
 	uint32_t	core;
-
-	UNUSED(argc);
-	UNUSED(argv);
 
 	core = GET_RUNNING_CORE;
 	vKillRequest[core] = true;
@@ -232,14 +226,14 @@ static	void	local_process(const void *argument) {
 		default:			 	 { voltage = (const char_t *)"Unknown";				break; }
 	}
 
-	(void)dprintf(KURT0, "\n\n");
-	(void)dprintf(KURT0, "Card type             %s\n",				 card);
-	(void)dprintf(KURT0, "Card Manufacturer ID  0x%02"PRIX8", %s\n", sdCard.oManufacturer, manufacturer);
-	(void)dprintf(KURT0, "Card Product Name     %s\n",				 sdCard.oProductName);
-	(void)dprintf(KURT0, "Card Serial Number    %08"PRIX32"\n",		 sdCard.oSerialNumber);
-	(void)dprintf(KURT0, "Card size [Bytes]     %"PRIu64"\n",		 sdCard.oSize);
-	(void)dprintf(KURT0, "Card speed            %"PRIu32"-bit/s\n",  sdCard.oSpeed);
-	(void)dprintf(KURT0, "Card voltage          %s\n",				 voltage);
+	(void)dprintf(KSYST, "\n\n");
+	(void)dprintf(KSYST, "Card type             %s\n",				 card);
+	(void)dprintf(KSYST, "Card Manufacturer ID  0x%02"PRIX8", %s\n", sdCard.oManufacturer, manufacturer);
+	(void)dprintf(KSYST, "Card Product Name     %s\n",				 sdCard.oProductName);
+	(void)dprintf(KSYST, "Card Serial Number    %08"PRIX32"\n",		 sdCard.oSerialNumber);
+	(void)dprintf(KSYST, "Card size [Bytes]     %"PRIu64"\n",		 sdCard.oSize);
+	(void)dprintf(KSYST, "Card speed            %"PRIu32"-bit/s\n",  sdCard.oSpeed);
+	(void)dprintf(KSYST, "Card voltage          %s\n",				 voltage);
 
 	while (*killRequest == false) {
 		kern_suspendProcess(1u);

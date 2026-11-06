@@ -1,10 +1,10 @@
 /*
 ; modules.
 ; ========
-
+;
 ; SPDX-License-Identifier: MIT
 ; SPDX-FileCopyrightText: 2025-2026 Edo. Franzi
-
+;
 ;------------------------------------------------------------------------
 ; Author:	Edo. Franzi		The 2025-01-01
 ; Modifs:
@@ -235,7 +235,6 @@ enum {
 			KNUM_ECHO			   = (((uint32_t)'0'<<8) + (uint32_t)'9'),									// echo module
 			KNUM_ESP32			   = (((uint32_t)'1'<<8) + (uint32_t)'0'),									// esp32 module
 			KNUM_FILL			   = (((uint32_t)'1'<<8) + (uint32_t)'1'),									// fill module
-			KNUM_FLASH			   = (((uint32_t)'1'<<8) + (uint32_t)'2'),									// flash management
 			KNUM_GDB			   = (((uint32_t)'1'<<8) + (uint32_t)'3'),									// gdb management
 			KNUM_HEX_LOADER	       = (((uint32_t)'1'<<8) + (uint32_t)'4'),									// hexloader module
 			KNUM_KILL			   = (((uint32_t)'1'<<8) + (uint32_t)'5'),									// kill module
@@ -294,7 +293,8 @@ enum {
 			KNUM_MCORE			   = (((uint32_t)'0'<<8) + (uint32_t)'5'),									// multi-core module
 			KNUM_NOP			   = (((uint32_t)'0'<<8) + (uint32_t)'6'),									// nop module (test)
 			KNUM_STARTUP		   = (((uint32_t)'0'<<8) + (uint32_t)'7'),									// startup module
-			KNUM_TUSB			   = (((uint32_t)'0'<<8) + (uint32_t)'8')									// TinyUSB moduele
+            KNUM_TUSB              = (((uint32_t)'0'<<8) + (uint32_t)'8'),                                  // TinyUSB moduele
+            KNUM_SPLASH            = (((uint32_t)'0'<<8) + (uint32_t)'9')                                   // splash module
 };
 
 // Daemons
@@ -323,8 +323,9 @@ enum {
 
 enum {
 			KNUM_SDCARD			   = (((uint32_t)'0'<<8) + (uint32_t)'0'),									// sdcard manager
-			KNUM_SERIAL_FLASH	   = (((uint32_t)'0'<<8) + (uint32_t)'1'),									// serialFlash manager
-			KNUM_STORAGE		   = (((uint32_t)'0'<<8) + (uint32_t)'2')									// storage manager
+			KNUM_SDNAND			   = (((uint32_t)'0'<<8) + (uint32_t)'1'),									// sdnand manager
+			KNUM_FLASH			   = (((uint32_t)'0'<<8) + (uint32_t)'2'),									// flash manager
+			KNUM_STORAGE		   = (((uint32_t)'0'<<8) + (uint32_t)'3')									// storage manager
 };
 
 // Applications

@@ -1,10 +1,10 @@
 /*
 ; stub.
 ; =====
-
+;
 ; SPDX-License-Identifier: MIT
 ; SPDX-FileCopyrightText: 2025-2026 Edo. Franzi
-
+;
 ;------------------------------------------------------------------------
 ; Author:	Edo. Franzi		The 2025-01-01
 ; Modifs:
@@ -71,9 +71,10 @@ void	stub_intr_io_init(void) {
 	NVIC_SetPriority(EXTI15_10_C0_IRQn, KHW_PRIORITY_HIGH);
 	NVIC_EnableIRQ(EXTI15_10_C0_IRQn);
 
-	EXTI->FTSR1	  |= (1u<<BPC13);
-	EXTI->D3PMR1  |= (1u<<BPC13);
-	EXTI->CPUIMR1 |= (1u<<BPC13);
+	EXTI->RTSR1	  &= ~(1u<<BPC13);
+	EXTI->FTSR1	  |=  (1u<<BPC13);
+	EXTI->CPUPR1   =  (1u<<BPC13);
+	EXTI->CPUIMR1 |=  (1u<<BPC13);
 }
 
 /*
@@ -85,7 +86,7 @@ static	void	stub_intr_io_interruption(void) {
 
 	core = GET_RUNNING_CORE;
 
-	EXTI->CPUPR1 |= (1u<<BPC13);
+	EXTI->CPUPR1 = (1u<<BPC13);
 	vCounter++;
 
 	PREEMPTION_THRESHOLD(core);

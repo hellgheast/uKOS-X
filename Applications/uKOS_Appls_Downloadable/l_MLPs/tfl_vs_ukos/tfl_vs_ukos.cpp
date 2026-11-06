@@ -1,10 +1,10 @@
 /*
 ; tfl_vs_ukos.
 ; ============
-
+;
 ; SPDX-License-Identifier: MIT
 ; SPDX-FileCopyrightText: 2025-2026 Edo. Franzi
-
+;
 ;------------------------------------------------------------------------
 ; Author:	Edo. Franzi		The 2025-01-01
 ; Modifs:
@@ -115,14 +115,12 @@
 #pragma GCC diagnostic ignored "-Wswitch-default"
 #pragma GCC diagnostic ignored "-Wdeprecated-declarations"
 #pragma GCC diagnostic ignored "-Wpedantic"
-#include	"tensorflow/lite/core/c/common.h"
 #include	"tensorflow/lite/micro/micro_interpreter.h"
 #include	"tensorflow/lite/micro/micro_log.h"
 #include	"tensorflow/lite/micro/micro_mutable_op_resolver.h"
 #include	"tensorflow/lite/micro/micro_profiler.h"
 #include	"tensorflow/lite/micro/recording_micro_interpreter.h"
 #include	"tensorflow/lite/micro/system_setup.h"
-#include	"tensorflow/lite/schema/schema_generated.h"
 
 #if (defined(CORTEX))
 #include	"tensorflow/lite/micro/cortex_m_generic/debug_log_callback.h"
@@ -132,7 +130,7 @@
 
 // TFLite & uKOS-X models
 
-#include	"./_Models/mlp_model.c_inc"
+#include	"./_Models/NN_model.c_inc"
 #include	"./_Models/network.c_inc"
 
 // uKOS-X specific (see the module.h)
@@ -202,8 +200,6 @@ void	RegisterOps(tflite::MicroMutableOpResolver<3> &resolver) {
 #if (defined(RISCV))
 extern "C"	char_t	putchar_(char_t ch) {
 
-	UNUSED(ch);
-
 	return (ch);
 }
 #endif
@@ -231,15 +227,13 @@ void	debuglog(const char *s) {
 namespace {
 
 [[noreturn]]
-void	aProcess_0(const void *argument) {
-	TfLiteTensor	*input;
-	uint64_t		time[2];
-	uint32_t		random[2], delta = 0u;
-	uint32_t		minUkos = 0xFFFFFFFFu, minTFL = 0xFFFFFFFFu;
-	uint32_t		maxUkos = 0u, maxTFL = 0u;
-	float32_t		x, y, gain = 2.0f;
-
-	UNUSED(argument);
+void	aProcess_0([[maybe_unused]] const void *argument) {
+	tflite::micro::TfLiteTensor		*input;;
+	uint64_t						time[2];
+	uint32_t						random[2], delta = 0u;
+	uint32_t						minUkos = 0xFFFFFFFFu, minTFL = 0xFFFFFFFFu;
+	uint32_t						maxUkos = 0u, maxTFL = 0u;
+	float32_t						x_f, y_f, gain_f = 2.0f;
 
 	#if (defined(CORTEX))
 	RegisterDebugLogCallback(debuglog);
@@ -250,7 +244,7 @@ void	aProcess_0(const void *argument) {
 
 // Load the TFLite model
 
-		const tflite::Model *model = tflite::GetModel(mlp_model_tflite);
+		const tflite::Model *model = tflite::GetModel(NN_model_tflite);
 		if (model->version() != TFLITE_SCHEMA_VERSION) {
 			(void)dprintf(KSYST, "Error : Model version not compatible\n");
 			exit(EXIT_OS_FAILURE);
@@ -265,7 +259,7 @@ void	aProcess_0(const void *argument) {
 
 // Allocate for the tensors
 
-		if (interpreter.AllocateTensors() != kTfLiteOk) {
+		if (interpreter.AllocateTensors() != tflite::micro::kTfLiteOk) {
 			(void)dprintf(KSYST, "Error: Tensor allocation!\n");
 			exit(EXIT_OS_FAILURE);
 		}
@@ -274,32 +268,36 @@ void	aProcess_0(const void *argument) {
 // --------------------------
 
 		random_read(KRANDOM_SOFT, &random[0], 2u);
-		x = (((float32_t)random[0] / (float32_t)(KRAND_MAX)) - 0.5f) * gain;
-		y = (((float32_t)random[1] / (float32_t)(KRAND_MAX)) - 0.5f) * gain;
+		x_f = (((float32_t)random[0] / (float32_t)(KRAND_MAX)) - 0.5f) * gain_f;
+		y_f = (((float32_t)random[1] / (float32_t)(KRAND_MAX)) - 0.5f) * gain_f;
 
 // For TensorFlowLite
 // Prepare the inputs
 
 		kern_suspendProcess(500u);
 		input = interpreter.input(0);
-		input->data.f[0] = x;
-		input->data.f[1] = y;
+		input->data.f[0] = x_f;
+		input->data.f[1] = y_f;
 
 		kern_readTickCount(&time[0]);
-		interpreter.Invoke();
+		if (interpreter.Invoke() != tflite::micro::kTfLiteOk) {
+			(void)dprintf(KSYST, "Error: TensorFlow inference!\n");
+			exit(EXIT_OS_FAILURE);
+		}
+
 		kern_readTickCount(&time[1]);
 		delta = (uint32_t)(time[1] - time[0]);
 
-		if (delta < minTFL) { minTFL = delta; }
-		if (delta > maxTFL) { maxTFL = delta; }
+		minTFL = std::min(delta, minTFL);
+		maxTFL = std::max(delta, maxTFL);
 		(void)dprintf(KSYST, "Exec time for TensorFlowLite, min = %" PRIu32 " [us], max = %" PRIu32 " [us]\n", minTFL, maxTFL);
 
 // For MLPN uKOS-X
 // Prepare the inputs
 
 		kern_suspendProcess(500u);
-		vInput_L1[0] = x;
-		vInput_L1[1] = y;
+		vInput_L1_f[0] = x_f;
+		vInput_L1_f[1] = y_f;
 
 		kern_readTickCount(&time[0]);
 		mlpn_compute(&aNetwork);
@@ -329,9 +327,6 @@ MAIN_ENTRY(argc, argv[]) {
 
 	STRG_LOC_CONST(aStrIden_0[]) =    "Process_User";
 	STRG_LOC_CONST(aStrText_0[]) =    "Process user.                             (c) EFr-2026";
-
-	UNUSED(argc);
-	UNUSED(argv);
 
 // Initialise the C++ constructors
 

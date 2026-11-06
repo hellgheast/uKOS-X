@@ -1,10 +1,10 @@
 /*
 ; startUp.
 ; ========
-
+;
 ; SPDX-License-Identifier: MIT
 ; SPDX-FileCopyrightText: 2025-2026 Edo. Franzi
-
+;
 ;------------------------------------------------------------------------
 ; Author:	Edo. Franzi		The 2025-01-01
 ; Modifs:
@@ -64,7 +64,7 @@ STRG_LOC_CONST(aStrApplication[]) =	"startUp      StartUp process of the system.
 
 #define	KEXECUTION_CORE		((1u<<BCORE_1) | (1u<<BCORE_0))
 
-static	int32_t		prgm(uint32_t argc, const char_t *argv[]);
+static	int32_t		prgm([[maybe_unused]] uint32_t argc, [[maybe_unused]] const char_t *argv[]);
 
 MODULE(
 	StartUp,						// Module name (the first letter has to be upper case)
@@ -95,11 +95,8 @@ extern	void	stub_startUp_launch(void);
  * \brief Main entry point
  *
  */
-static	int32_t	prgm(uint32_t argc, const char_t *argv[]) {
+static	int32_t	prgm([[maybe_unused]] uint32_t argc, [[maybe_unused]] const char_t *argv[]) {
 	proc_t	*process;
-
-	UNUSED(argc);
-	UNUSED(argv);
 
 	PROCESS_STACKMALLOC(
 		0,									// Index
@@ -112,7 +109,7 @@ static	int32_t	prgm(uint32_t argc, const char_t *argv[]) {
 		KKERN_PRIORITY_LOW_14				// KKERN_PRIORITY_HIGH < Priority < KKERN_PRIORITY_LOW_14. KKERN_PRIORITY_LOW_15 is reserved for the idle process
 	);
 
-	if (kern_createProcess(&specification, nullptr, &process) != KERR_KERN_NOERR) { LOG(KFATAL_SYSTEM, "startup: reate proc"); exit(EXIT_OS_PANIC); }
+	if (kern_createProcess(&specification, nullptr, &process) != KERR_KERN_NOERR) { LOG(KFATAL_SYSTEM, "startup: create proc"); exit(EXIT_OS_PANIC); }
 
 	LOG(KINFO_SYSTEM, "startup: process start-up launched");
 	return (EXIT_OS_SUCCESS_CLI);
@@ -128,9 +125,7 @@ static	int32_t	prgm(uint32_t argc, const char_t *argv[]) {
  *
  */
 [[noreturn]]
-static	void	local_process(const void *argument) {
-
-	UNUSED(argument);
+static	void	local_process([[maybe_unused]] const void *argument) {
 
 	stub_startUp_launch();
 	exit(EXIT_OS_SUCCESS);

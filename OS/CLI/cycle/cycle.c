@@ -1,10 +1,10 @@
 /*
 ; cycle.
 ; ======
-
+;
 ; SPDX-License-Identifier: MIT
 ; SPDX-FileCopyrightText: 2025-2026 Edo. Franzi
-
+;
 ;------------------------------------------------------------------------
 ; Author:	Edo. Franzi		The 2025-01-01
 ; Modifs:
@@ -69,7 +69,7 @@ STRG_LOC_CONST(aStrHelp[])		  = "cycle\n"
 
 									"Module built on "__DATE__"  "__TIME__" (c) EFr-2026\n\n";
 
-static	int32_t		prgm(uint32_t argc, const char_t *argv[]);
+static	int32_t		prgm([[maybe_unused]] uint32_t argc, [[maybe_unused]] const char_t *argv[]);
 static	int32_t		cycle_clean(uint32_t argc, const char_t *argv[]);
 
 MODULE(
@@ -148,9 +148,6 @@ static	int32_t	prgm(uint32_t argc, const char_t *argv[]) {
 			cyclePack_t			pack;
 			bool				stop = false, releasePack = false;
 	const	uKOS_module_t		*module = nullptr;
-
-	UNUSED(argc);
-	UNUSED(argv);
 
 	core = GET_RUNNING_CORE;
 	vKillRequest[core] = false;
@@ -251,12 +248,17 @@ static	int32_t	prgm(uint32_t argc, const char_t *argv[]) {
 				KKERN_PRIORITY_NORMAL_01					// KKERN_PRIORITY_HIGH < Priority < KKERN_PRIORITY_LOW_14. KKERN_PRIORITY_LOW_15 is reserved for the idle process
 			);
 
+// The stack is allocated above, before it is known whether a process will use
+// it: give it back on both refusals, otherwise each one leaks a cycle stack
+
 			if (vProcess[core][indexSerialManager] == nullptr) {
 				if (kern_createProcess(&specification, &pack, &vProcess[core][indexSerialManager]) != KERR_KERN_NOERR) {
+					memo_free(vStack_0);
 					error = KERR_PRO;
 				}
 			}
 			else {
+				memo_free(vStack_0);
 				error = KERR_CAU;
 			}
 			break;
@@ -306,11 +308,8 @@ static	int32_t	prgm(uint32_t argc, const char_t *argv[]) {
  *		- Free all the ressources
  *
  */
-static	int32_t	cycle_clean(uint32_t argc, const char_t *argv[]) {
+static	int32_t	cycle_clean([[maybe_unused]] uint32_t argc, [[maybe_unused]] const char_t *argv[]) {
 	uint32_t	core;
-
-	UNUSED(argc);
-	UNUSED(argv);
 
 	core = GET_RUNNING_CORE;
 	vKillRequest[core] = true;

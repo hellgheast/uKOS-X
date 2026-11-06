@@ -1,10 +1,10 @@
 /*
 ; spi_commun.
 ; ===========
-
+;
 ; SPDX-License-Identifier: MIT
 ; SPDX-FileCopyrightText: 2025-2026 Edo. Franzi
-
+;
 ;------------------------------------------------------------------------
 ; Author:	Edo. Franzi		The 2025-01-01
 ; Modifs:
@@ -88,6 +88,13 @@ enum {
 			BSPI_POL = 0u,										// Polarity
 			BSPI_PHA											// Phase
 };
+
+// Bound of a single-byte transfer (spiN_writeRead), in ms. A byte takes
+// microseconds at any speed; a transfer that has not completed within this time
+// never will, and waiting forever hung the caller - the whole console when that
+// was wkspi. Keep it at least one kernel tick: shorter rounds down to no wait.
+
+#define	KSPI_TIMEOUT_WRITEREAD		1000u
 
 /**@}*/
 /**@}*/

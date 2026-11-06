@@ -1,11 +1,11 @@
 #!/usr/bin/env zsh
-
+#
 # ukos_gnu_gcc_arc_elf.
 # =====================
-
+#
 # SPDX-License-Identifier: MIT
 # SPDX-FileCopyrightText: 2025-2026 Edo. Franzi
-
+#
 #------------------------------------------------------------------------
 # Author:	Edo. Franzi		The 2025-01-01
 # Modifs:
@@ -20,7 +20,7 @@
 #			./ukos_gnu_gcc_arc_elf.sh
 #
 #			OS:
-#			OSX 26.xx			yes
+#			OSX 27.xx			yes
 #			Ubuntu 26.04 LTS	yes
 #
 #   (c) 2025-2026, Edo. Franzi
@@ -149,7 +149,7 @@ fi
 
 if [[ ! -d "newlib-${NLB_VER}" ]]; then
 	echo "Downloading newlib-${NLB_VER}"
-	git clone "https://sourceware.org/git/newlib-cygwin.git" "newlib-${NLB_VER}"
+	git clone https://github.com/mirror/newlib-cygwin.git "${PACKS_NLB}"
 	git -C "newlib-${NLB_VER}" fetch --tags
 	git -C "newlib-${NLB_VER}" checkout "tags/newlib-${NLB_VER}"
 fi

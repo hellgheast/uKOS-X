@@ -1,10 +1,10 @@
 /*
 ; lvgl.
 ; =====
-
+;
 ; SPDX-License-Identifier: MIT
 ; SPDX-FileCopyrightText: 2025-2026 Edo. Franzi
-
+;
 ;------------------------------------------------------------------------
 ; Author:	Edo. Franzi		The 2025-01-01
 ; Modifs:
@@ -71,11 +71,9 @@ extern	void	ui_draw(void);
  *
  */
 [[noreturn]]
-static	void	aProcess_lvgl_tick(const void *argument) {
+static	void	aProcess_lvgl_tick([[maybe_unused]] const void *argument) {
 	uint32_t	core, delta;
 	uint64_t	last, now;
-
-	UNUSED(argument);
 
 	core = GET_RUNNING_CORE;
 
@@ -108,11 +106,9 @@ static	void	aProcess_lvgl_tick(const void *argument) {
  *
  */
 [[noreturn]]
-static	void	aProcess_lvgl(const void *argument) {
+static	void	aProcess_lvgl([[maybe_unused]] const void *argument) {
 	uint32_t	core, LCDBufferSize;
 	lv_color_t	*LCDBuffer;
-
-	UNUSED(argument);
 
 	core = GET_RUNNING_CORE;
 

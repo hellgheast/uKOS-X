@@ -1,10 +1,10 @@
 /*
 ; ui.
 ; ===
-
+;
 ; SPDX-License-Identifier: MIT
 ; SPDX-FileCopyrightText: 2025-2026 Edo. Franzi
-
+;
 ;------------------------------------------------------------------------
 ; Author:	Edo. Franzi		The 2025-01-01
 ; Modifs:
@@ -52,7 +52,7 @@
 
 // Display size
 
-#define	KLCD_BUF_LINES		80u						// Limited buffer (80 * KLCD_WIDTH * 2) to force partial rendering
+#define	KLCD_BUF_LINES		10u						// Limited buffer (10 * KLCD_WIDTH * 4) to force partial rendering
 #define	KLCD_WIDTH			800						// LCD width
 #define	KLCD_HEIGHT			480						// LCD height
 
@@ -78,6 +78,7 @@
 
 #define	KARC_DIAMETER		87						// Arc diameter
 #define	KARC_MARGIN			20						// Arc margin
+#define	KARC_WIDTH			5						// Arc width
 #define	KARC_POS_X			693						// X Arc
 #define	KARC_POS_Y			340						// Y Arc
 
@@ -87,3 +88,5 @@
 #define	KTEXT_POS_Y_1		260						// Text Y, random
 #define	KTEXT_POS_X_2		270						// Text X, execution TensorFlow
 #define	KTEXT_POS_Y_2		300						// Text Y, execution TensorFlow
+#define	KTEXT_POS_X_3		270						// Text X, execution NPU
+#define	KTEXT_POS_Y_3		320						// Text Y, execution NPU

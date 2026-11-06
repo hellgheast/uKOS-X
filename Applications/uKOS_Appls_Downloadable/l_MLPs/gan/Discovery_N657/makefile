@@ -1,9 +1,9 @@
 # makefile.
 # =========
-
+#
 # SPDX-License-Identifier: MIT
 # SPDX-FileCopyrightText: 2025-2026 Edo. Franzi
-
+#
 #------------------------------------------------------------------------
 # Author:	Edo. Franzi		The 2025-01-01
 # Modifs:
@@ -58,7 +58,7 @@ APPL_SRC		+= $(PATH_DEMO)/Classifier
 APPL_SRC		+= $(PATH_DEMO)/Graphics
 APPL_SRC		+= $(PATH_DEMO)/Graphics/Widgets/$(BOARD)/background
 
-DISPLAY			?= RK050HR18_5_Inches
+DISPLAY			=  RK050HR18_5_Inches
 PATH_LVGL		=  $(PATH_UKOS)/Third_Parties/LVGL
 
 # Target & Infrastructure
@@ -71,21 +71,25 @@ VARIANT			=  Variant_Test
 SOC				=  STM32N657
 CORE			=  CORTEX_M55
 OPTIMISATION	=  -Os
+NN_DEFINES		=  -DUSE_NN_HARDWARE
 
-CFLAGS			+= -I$(PATH_LVGL)/LVGL-current
+CFLAGS			+= $(NN_DEFINES)
+CFLAGS			+= -isystem $(PATH_LVGL)/LVGL-current
 CFLAGS			+= -I$(PATH_LVGL)/Library/$(DISPLAY)
 CFLAGS			+= -I$(PATH_LVGL)/Library/$(DISPLAY)/$(CORE)
-CFLAGS			+= -isystem $(PATH_LVGL)/LVGL-current
 
-CXXFLAGS		+= -I$(PATH_LVGL)/LVGL-current
+CXXFLAGS		+= $(NN_DEFINES)
+CXXFLAGS		+= -isystem $(PATH_LVGL)/LVGL-current
 CXXFLAGS		+= -I$(PATH_LVGL)/Library/$(DISPLAY)
 CXXFLAGS		+= -I$(PATH_LVGL)/Library/$(DISPLAY)/$(CORE)
 CXXFLAGS		+= -DTF_LITE_STATIC_MEMORY=1
 
-MYLIB			=    $(PATH_UKOS)/Third_Parties/Tflite-micro/Library/$(CORE)/libTFLite.a
-PATH_INCLUDES	+= -I$(PATH_UKOS)/Third_Parties/Tflite-micro/Library/Generic/CORTEX_M_generic
-PATH_INCLUDES	+= -I$(PATH_UKOS)/Third_Parties/Tflite-micro/Library/Generic/CORTEX_M_generic/third_party/flatbuffers/include
-PATH_INCLUDES	+= -I$(PATH_UKOS)/Third_Parties/Tflite-micro/Library/Generic/CORTEX_M_generic/third_party/gemmlowp
+MYLIB			= 			$(PATH_UKOS)/Third_Parties/Tflite-micro/Library/$(CORE)/libTFLite.a
+MYLIB			+=			$(PATH_UKOS)/Third_Parties/STM32/STM32N6/Library/AI/$(PROJECT)/libNN_Hardware.a
+PATH_INCLUDES	+= -isystem $(PATH_UKOS)/Third_Parties/Tflite-micro/Library/Generic/CORTEX_M_generic
+PATH_INCLUDES	+= -isystem $(PATH_UKOS)/Third_Parties/Tflite-micro/Library/Generic/CORTEX_M_generic/third_party/flatbuffers/include
+PATH_INCLUDES	+= -isystem $(PATH_UKOS)/Third_Parties/Tflite-micro/Library/Generic/CORTEX_M_generic/third_party/gemmlowp
+PATH_INCLUDES	+= -isystem $(PATH_UKOS)/Third_Parties/STM32/STM32N6/Library/AI/$(PROJECT)
 
 PATH_INCLUDES	+= -I$(PATH_DEMO)/Classifier
 PATH_INCLUDES	+= -I$(PATH_DEMO)/Graphics

@@ -1,10 +1,10 @@
 /*
 ; stub_urt0_uart.
 ; ===============
-
+;
 ; SPDX-License-Identifier: MIT
 ; SPDX-FileCopyrightText: 2025-2026 Edo. Franzi
-
+;
 ;------------------------------------------------------------------------
 ; Author:	Edo. Franzi		The 2025-01-01
 ; Modifs:
@@ -179,5 +179,16 @@ int32_t	stub_urt0_flush(void) {
 
 	if (core == KCORE_0) { status = model_usart_flush_C0(); }
 	else				 { status = model_usart_flush_C1(); }
+	return (status);
+}
+
+int32_t	stub_urt0_isConnected(void) {
+	uint32_t	core;
+	int32_t		status;
+
+	core = GET_RUNNING_CORE;
+
+	if (core == KCORE_0) { status = model_usart_isConnected_C0(); }
+	else				 { status = model_usart_isConnected_C1(); }
 	return (status);
 }

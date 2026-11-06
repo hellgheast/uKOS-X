@@ -1,11 +1,11 @@
 /*
 ; stub_startUp.
 ; =============
-
+;
 ; SPDX-License-Identifier: MIT
 ; SPDX-FileCopyrightText: 2025-2026 Edo. Franzi
 ; SPDX-FileCopyrightText: 2025-2026 Laurent von Allmen
-
+;
 ;------------------------------------------------------------------------
 ; Author:	Edo. Franzi		The 2025-01-01
 ; Modifs:
@@ -50,8 +50,6 @@
 */
 
 #include	"uKOS.h"
-
-extern	bool	TinyUSB_cdc_isConnected(uint8_t itf);
 
 // Bootstrap function table
 // ------------------------
@@ -164,14 +162,14 @@ void	stub_startUp_launch(void) {
 			configureURTx.oStopBits = KSERIAL_STOPBITS_1;
 			configureURTx.oParity   = KSERIAL_PARITY_NONE;
 			configureURTx.oBaudRate = functions[mode].oBaudrate;
-			configureURTx.oKernSync = ((uint32_t)1u<<(uint32_t)BSERIAL_SEMAPHORE_RX);
+			configureURTx.oKernSync = (uint8_t)(1u<<BSERIAL_SEMAPHORE_RX);
 			serial_configure(KURT0, &configureURTx);
 
 			configureCDCx.oNBBits   = KSERIAL_NB_BITS_8;
 			configureCDCx.oStopBits = KSERIAL_STOPBITS_1;
 			configureCDCx.oParity   = KSERIAL_PARITY_NONE;
 			configureCDCx.oBaudRate = functions[mode].oBaudrate;
-			configureCDCx.oKernSync = ((uint32_t)1u<<(uint32_t)BSERIAL_SEMAPHORE_RX);
+			configureCDCx.oKernSync = (uint8_t)(1u<<BSERIAL_SEMAPHORE_RX);
 			serial_configure(KCDC0, &configureCDCx);
 			break;
 		}
@@ -186,7 +184,7 @@ void	stub_startUp_launch(void) {
 			configureURTx.oStopBits = KSERIAL_STOPBITS_1;
 			configureURTx.oParity   = KSERIAL_PARITY_NONE;
 			configureURTx.oBaudRate = functions[mode].oBaudrate;
-			configureURTx.oKernSync = ((uint32_t)1u<<(uint32_t)BSERIAL_SEMAPHORE_RX);
+			configureURTx.oKernSync = (uint8_t)(1u<<BSERIAL_SEMAPHORE_RX);
 			serial_configure(KURT0, &configureURTx);
 			break;
 		}
@@ -203,7 +201,7 @@ void	stub_startUp_launch(void) {
 	configureURTx.oStopBits = KSERIAL_STOPBITS_1;
 	configureURTx.oParity   = KSERIAL_PARITY_NONE;
 	configureURTx.oBaudRate = functions[mode].oBaudrate;
-	configureURTx.oKernSync = ((uint32_t)1u<<(uint32_t)BSERIAL_SEMAPHORE_RX);
+	configureURTx.oKernSync = (uint8_t)(1u<<BSERIAL_SEMAPHORE_RX);
 	serial_configure(KURT0, &configureURTx);
 	#endif
 
@@ -242,10 +240,11 @@ void	stub_startUp_launch(void) {
 
 	#if (CONFIG_DIFFERENT_SERIAL_PER_CORE_S == true)
 	if (core == KCORE_0) {
-		while (TinyUSB_cdc_isConnected(0u) == false) {
+		while (cdc0_isConnected() == KERR_SERIAL_NOTCO) {
 			kern_suspendProcess(10u);
 		}
 		kern_suspendProcess(100u);
+
 		(void)dprintf(KSYST, "%s", aStrLogo);
 		(void)dprintf(KSYST, "Signature:\n%s\n\n", signature);
 		(void)dprintf(KSYST, "%ssw = %"PRIX32"\n", identifier, mode);

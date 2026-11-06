@@ -1,10 +1,10 @@
 /*
 ; stub.
 ; =====
-
+;
 ; SPDX-License-Identifier: MIT
 ; SPDX-FileCopyrightText: 2025-2026 Edo. Franzi
-
+;
 ;------------------------------------------------------------------------
 ; Author:	Edo. Franzi		The 2025-01-01
 ; Modifs:
@@ -79,8 +79,6 @@ void	stub_LCD_flush_cb(lv_display_t *lv_display, const lv_area_t *area, uint8_t 
 	int32_t		h = area->y2 - area->y1 + 1;
 	int32_t		line, x, y;
 	uint8_t		*src, *dst;
-
-	UNUSED(lv_display);
 
 	for (line = 0; line < h; line++) {
 		y = area->y1 + line;

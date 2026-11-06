@@ -1,10 +1,10 @@
 /*
 ; rpn.
 ; ====
-
+;
 ; SPDX-License-Identifier: MIT
 ; SPDX-FileCopyrightText: 2025-2026 Edo. Franzi
-
+;
 ;------------------------------------------------------------------------
 ; Author:	Edo. Franzi		The 2025-01-01
 ; Modifs:
@@ -179,7 +179,7 @@ static	void	local_pow(uint32_t argc, const char_t *argv[]);
  *
  */
 [[noreturn]]
-static	void	aProcess(const void *argument) {
+static	void	aProcess([[maybe_unused]] const void *argument) {
 	decNumber		x;
 	uint32_t		argc = 0u;
 
@@ -192,8 +192,6 @@ static	void	aProcess(const void *argument) {
 	if (commandLine == nullptr) { LOG(KFATAL_USER, "memo_malloc commandLine"); exit(EXIT_OS_FAILURE); }
 	if (parameters == nullptr)	{ LOG(KFATAL_USER, "memo_malloc parameters");  exit(EXIT_OS_FAILURE); }
 	if (argv == nullptr)		{ LOG(KFATAL_USER, "memo_malloc argv");		   exit(EXIT_OS_FAILURE); }
-
-	UNUSED(argument);
 
 	(void)dprintf(KSYST, "\n");
 
@@ -208,9 +206,22 @@ static	void	aProcess(const void *argument) {
 
 	while (vTerminate == false) {
 		text_waitString(KSYST, commandLine, KLN_CMD_LINE_BUF);
-		text_readArgs(commandLine, KLN_CMD_LINE_BUF, argv, &argc);
 
-		memcpy((void *)parameters, (const void *)argv, KNB_PARAMETERS);
+// argv holds KNB_PARAMETERS pointers: a longer line is refused rather than
+// written past the end of the array
+
+		if (text_readArgs(commandLine, KLN_CMD_LINE_BUF, argv, KNB_PARAMETERS, &argc) != KERR_TEXT_NOERR) {
+			(void)dprintf(KSYST, "Too many arguments.\n");
+			continue;
+		}
+
+// A line of blanks has no argument: parameters[0] would be the previous line's
+
+		if (argc == 0u) {
+			continue;
+		}
+
+		memcpy((void *)parameters, (const void *)argv, (KNB_PARAMETERS * sizeof(char_t *)));
 
 		vSet.status = 0u;
 		decNumberFromString(&x, parameters[0], &vSet);
@@ -252,9 +263,6 @@ MAIN_ENTRY(argc, argv[]) {
 	STRG_LOC_CONST(aStrIden[]) = "Process_User";
 	STRG_LOC_CONST(aStrText[]) = "Process user.                             (c) EFr-2026";
 
-	UNUSED(argc);
-	UNUSED(argv);
-
 // Specifications for the processes
 
 	PROCESS_STACKMALLOC(
@@ -281,9 +289,6 @@ MAIN_ENTRY(argc, argv[]) {
 			do {																				\
 				decNumber	x, y, r;															\
 				decimal64	rd64;																\
-																								\
-				UNUSED(argc);																	\
-				UNUSED(argv);																	\
 																								\
 				(x) = vRpnStack.oX;																\
 				(y) = vRpnStack.oY;																\
@@ -419,10 +424,7 @@ static	void	local_pop(void) {
  * - quit
  *
  */
-static	void	local_quit(uint32_t argc, const char_t *argv[]) {
-
-	UNUSED(argc);
-	UNUSED(argv);
+static	void	local_quit([[maybe_unused]] uint32_t argc, [[maybe_unused]] const char_t *argv[]) {
 
 	vTerminate = true;
 }
@@ -434,10 +436,7 @@ static	void	local_quit(uint32_t argc, const char_t *argv[]) {
  *		- push
  *
  */
-static	void	local_enter(uint32_t argc, const char_t *argv[]) {
-
-	UNUSED(argc);
-	UNUSED(argv);
+static	void	local_enter([[maybe_unused]] uint32_t argc, [[maybe_unused]] const char_t *argv[]) {
 
 	vEnter = true;
 	local_push();
@@ -451,7 +450,7 @@ static	void	local_enter(uint32_t argc, const char_t *argv[]) {
  *		- pop (if no error)
  *
  */
-static	void	local_sum(uint32_t argc, const char_t *argv[]) {
+static	void	local_sum([[maybe_unused]] uint32_t argc, [[maybe_unused]] const char_t *argv[]) {
 
 	X_Y_OPERATIONS(Add, argc, argv);
 }
@@ -464,7 +463,7 @@ static	void	local_sum(uint32_t argc, const char_t *argv[]) {
  *		- pop (if no error)
  *
  */
-static	void	local_sub(uint32_t argc, const char_t *argv[]) {
+static	void	local_sub([[maybe_unused]] uint32_t argc, [[maybe_unused]] const char_t *argv[]) {
 
 	X_Y_OPERATIONS(Subtract, argc, argv);
 }
@@ -477,7 +476,7 @@ static	void	local_sub(uint32_t argc, const char_t *argv[]) {
  *		- pop (if no error)
  *
  */
-static	void	local_mul(uint32_t argc, const char_t *argv[]) {
+static	void	local_mul([[maybe_unused]] uint32_t argc, [[maybe_unused]] const char_t *argv[]) {
 
 	X_Y_OPERATIONS(Multiply, argc, argv);
 }
@@ -490,7 +489,7 @@ static	void	local_mul(uint32_t argc, const char_t *argv[]) {
  *		- pop (if no error)
  *
  */
-static	void	local_div(uint32_t argc, const char_t *argv[]) {
+static	void	local_div([[maybe_unused]] uint32_t argc, [[maybe_unused]] const char_t *argv[]) {
 
 	X_Y_OPERATIONS(Divide, argc, argv);
 }
@@ -503,7 +502,7 @@ static	void	local_div(uint32_t argc, const char_t *argv[]) {
  *		- pop (if no error)
  *
  */
-static	void	local_pow(uint32_t argc, const char_t *argv[]) {
+static	void	local_pow([[maybe_unused]] uint32_t argc, [[maybe_unused]] const char_t *argv[]) {
 
 	X_Y_OPERATIONS(Power, argc, argv);
 }

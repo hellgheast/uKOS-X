@@ -1,10 +1,10 @@
 /*
 ; memory.
 ; =======
-
+;
 ; SPDX-License-Identifier: MIT
 ; SPDX-FileCopyrightText: 2025-2026 Edo. Franzi
-
+;
 ;------------------------------------------------------------------------
 ; Author:	Edo. Franzi		The 2025-01-01
 ; Modifs:
@@ -97,7 +97,7 @@ STRG_LOC_CONST(aStrHelp[])		  = "Give the memory information\n"
 
 #endif
 
-static	int32_t		prgm(uint32_t argc, const char_t *argv[]);
+static	int32_t		prgm([[maybe_unused]] uint32_t argc, [[maybe_unused]] const char_t *argv[]);
 
 MODULE(
 	Memory,										// Module name (the first letter has to be upper case)
@@ -138,12 +138,9 @@ static	void	local_displayHeap(uint8_t *stHeap, uint32_t blocks, uint32_t used, i
  * \brief Main entry point
  *
  */
-static	int32_t	prgm(uint32_t argc, const char_t *argv[]) {
+static	int32_t	prgm([[maybe_unused]] uint32_t argc, [[maybe_unused]] const char_t *argv[]) {
 	uint32_t	usdMemory, nbBlocks;
 	intptr_t	length;
-
-	UNUSED(argc);
-	UNUSED(argv);
 
 	PRIVILEGE_ELEVATE;
 
@@ -171,7 +168,7 @@ static	int32_t	prgm(uint32_t argc, const char_t *argv[]) {
 
 	#if (defined(PRIVILEGED_USER_S))
 	uint32_t	usedPrgmCode, usedPrgmData_p, usedPrgmData_u;
-	float64_t	usedPrgmCodef, usedPrgmData_pf, usedPrgmData_uf;
+	float64_t	usedPrgmCode_f, usedPrgmData_p_f, usedPrgmData_u_f;
 
 	usedPrgmCode    = (uint32_t)((uintptr_t)linker_enTEXT   - (uintptr_t)linker_stTEXT)		\
 					+ (uint32_t)((uintptr_t)linker_enRODATA - (uintptr_t)linker_stRODATA)	\
@@ -184,17 +181,17 @@ static	int32_t	prgm(uint32_t argc, const char_t *argv[]) {
 	usedPrgmData_u  = (uint32_t)((uintptr_t)linker_enDATA_u - (uintptr_t)linker_stDATA_u)	\
 					+ (uint32_t)((uintptr_t)linker_enBSS_u  - (uintptr_t)linker_stBSS_u);
 
-	usedPrgmCodef   = ((float64_t)usedPrgmCode   / (float64_t)(uintptr_t)linker_lnPrgmCode)   * 100.0;
-	usedPrgmData_pf = ((float64_t)usedPrgmData_p / (float64_t)(uintptr_t)linker_lnPrgmData_p) * 100.0;
-	usedPrgmData_uf = ((float64_t)usedPrgmData_u / (float64_t)(uintptr_t)linker_lnPrgmData_u) * 100.0;
+	usedPrgmCode_f   = ((float64_t)usedPrgmCode   / (float64_t)(uintptr_t)linker_lnPrgmCode)   * 100.0;
+	usedPrgmData_p_f = ((float64_t)usedPrgmData_p / (float64_t)(uintptr_t)linker_lnPrgmData_p) * 100.0;
+	usedPrgmData_u_f = ((float64_t)usedPrgmData_u / (float64_t)(uintptr_t)linker_lnPrgmData_u) * 100.0;
 
-	(void)dprintf(KSYST, "uKOS code:         addr = 0x%016"PRIXPTR", size = 0x%016"PRIXPTR" [Bytes], used: %5.2f [%%]\n", (uintptr_t)linker_stPrgmCode,        (uintptr_t)linker_lnPrgmCode,   usedPrgmCodef);
-	(void)dprintf(KSYST, "uKOS data_p:       addr = 0x%016"PRIXPTR", size = 0x%016"PRIXPTR" [Bytes], used: %5.2f [%%]\n", (uintptr_t)linker_stPrgmData_p,      (uintptr_t)linker_lnPrgmData_p, usedPrgmData_pf);
-	(void)dprintf(KSYST, "uKOS data_u:       addr = 0x%016"PRIXPTR", size = 0x%016"PRIXPTR" [Bytes], used: %5.2f [%%]\n", (uintptr_t)linker_stPrgmData_u,      (uintptr_t)linker_lnPrgmData_u, usedPrgmData_uf);
+	(void)dprintf(KSYST, "uKOS code:         addr = 0x%016"PRIXPTR", size = 0x%016"PRIXPTR" [Bytes], used: %5.2f [%%]\n", (uintptr_t)linker_stPrgmCode,        (uintptr_t)linker_lnPrgmCode,   usedPrgmCode_f);
+	(void)dprintf(KSYST, "uKOS data_p:       addr = 0x%016"PRIXPTR", size = 0x%016"PRIXPTR" [Bytes], used: %5.2f [%%]\n", (uintptr_t)linker_stPrgmData_p,      (uintptr_t)linker_lnPrgmData_p, usedPrgmData_p_f);
+	(void)dprintf(KSYST, "uKOS data_u:       addr = 0x%016"PRIXPTR", size = 0x%016"PRIXPTR" [Bytes], used: %5.2f [%%]\n", (uintptr_t)linker_stPrgmData_u,      (uintptr_t)linker_lnPrgmData_u, usedPrgmData_u_f);
 
 	#else
 	uint32_t	usedPrgmCode, usedPrgmData;
-	float64_t	usedPrgmCodef, usedPrgmDataf;
+	float64_t	usedPrgmCode_f, usedPrgmData_f;
 
 	usedPrgmCode  = (uint32_t)((uintptr_t)linker_enTEXT   - (uintptr_t)linker_stTEXT)		\
 				  + (uint32_t)((uintptr_t)linker_enRODATA - (uintptr_t)linker_stRODATA)		\
@@ -203,11 +200,11 @@ static	int32_t	prgm(uint32_t argc, const char_t *argv[]) {
 	usedPrgmData  = (uint32_t)((uintptr_t)linker_enDATA   - (uintptr_t)linker_stDATA)		\
 				  + (uint32_t)((uintptr_t)linker_enBSS    - (uintptr_t)linker_stBSS);
 
-	usedPrgmCodef = ((float64_t)usedPrgmCode / (float64_t)((uintptr_t)linker_lnPrgmCode)) * 100.0;
-	usedPrgmDataf = ((float64_t)usedPrgmData / (float64_t)((uintptr_t)linker_lnPrgmData)) * 100.0;
+	usedPrgmCode_f = ((float64_t)usedPrgmCode / (float64_t)((uintptr_t)linker_lnPrgmCode)) * 100.0;
+	usedPrgmData_f = ((float64_t)usedPrgmData / (float64_t)((uintptr_t)linker_lnPrgmData)) * 100.0;
 
-	(void)dprintf(KSYST, "uKOS code:         addr = 0x%016"PRIXPTR", size = 0x%016"PRIXPTR" [Bytes], used: %5.2f [%%]\n", (uintptr_t)linker_stPrgmCode, (uintptr_t)linker_lnPrgmCode, usedPrgmCodef);
-	(void)dprintf(KSYST, "uKOS data:         addr = 0x%016"PRIXPTR", size = 0x%016"PRIXPTR" [Bytes], used: %5.2f [%%]\n", (uintptr_t)linker_stPrgmData, (uintptr_t)linker_lnPrgmData, usedPrgmDataf);
+	(void)dprintf(KSYST, "uKOS code:         addr = 0x%016"PRIXPTR", size = 0x%016"PRIXPTR" [Bytes], used: %5.2f [%%]\n", (uintptr_t)linker_stPrgmCode, (uintptr_t)linker_lnPrgmCode, usedPrgmCode_f);
+	(void)dprintf(KSYST, "uKOS data:         addr = 0x%016"PRIXPTR", size = 0x%016"PRIXPTR" [Bytes], used: %5.2f [%%]\n", (uintptr_t)linker_stPrgmData, (uintptr_t)linker_lnPrgmData, usedPrgmData_f);
 	#endif
 
 	#if (KNB_CORES == 1)

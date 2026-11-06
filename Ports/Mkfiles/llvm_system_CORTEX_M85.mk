@@ -1,9 +1,9 @@
 # llvm_system_CORTEX_M85.
 # =======================
-
+#
 # SPDX-License-Identifier: MIT
 # SPDX-FileCopyrightText: 2025-2026 Laurent von Allmen
-
+#
 #------------------------------------------------------------------------
 # Author:	Laurent von Allmen	The 2025-01-01
 # Modifs:
@@ -99,6 +99,8 @@ C_CXX_FLAGS		+= -MMD
 
 C_CXX_FLAGS		+= -fshort-enums
 C_CXX_FLAGS		+= -fstack-usage
+C_CXX_FLAGS		+= -ffunction-sections
+C_CXX_FLAGS		+= -fdata-sections
 #C_CXX_FLAGS	+= -mpoke-function-name				#NOTE: option unknown by clang
 
 # Warnings for the build

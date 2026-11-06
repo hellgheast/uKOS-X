@@ -1,10 +1,10 @@
 /*
 ; model_flash_spi.
 ; ================
-
+;
 ; SPDX-License-Identifier: MIT
 ; SPDX-FileCopyrightText: 2025-2026 Edo. Franzi
-
+;
 ;------------------------------------------------------------------------
 ; Author:	Edo. Franzi		The 2025-01-01
 ; Modifs:
@@ -75,12 +75,12 @@ int32_t	model_flash_spi_initialise(void) {
 }
 
 /*
- * \brief model_flash_spi_readStatus
+ * \brief model_flash_spi_isPresent
  *
- * - Read the status of the card (only inserted)
+ * - Read the status of the flash (only inserted)
  *
  */
-int32_t	model_flash_spi_readStatus(void) {
+int32_t	model_flash_spi_isPresent(void) {
 
 	return (KERR_STORAGE_NOERR);
 }

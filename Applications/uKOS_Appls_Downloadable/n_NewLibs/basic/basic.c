@@ -1,10 +1,10 @@
 /*
 ; basic.
 ; ======
-
+;
 ; SPDX-License-Identifier: MIT
 ; SPDX-FileCopyrightText: 2025-2026 Edo. Franzi
-
+;
 ;------------------------------------------------------------------------
 ; Author:	Edo. Franzi		The 2025-01-01
 ; Modifs:
@@ -164,29 +164,27 @@ MODULE(
  *
  */
 [[noreturn]]
-static	void	aProcess_0(const void *argument) {
+static	void	aProcess_0([[maybe_unused]] const void *argument) {
 				uint32_t	delta;
 				uint64_t	time[2];
-	volatile	float64_t	n = 0.0, Pi = 0.0;
-
-	UNUSED(argument);
+	volatile	float64_t	n_f = 0.0, Pi_f = 0.0;
 
 	while (true) {
 		kern_suspendProcess(100u);
 		led_toggle(KLED_1);
 
 		kern_readTickCount(&time[0]);
-		Pi = Pi + ((1.0 / pow(16, n)) * ((4.0 / ((8.0 * n) + 1.0)))
-	   			- (2.0 / ((8.0 * n) + 4.0))
-	    		- (1.0 / ((8.0 * n) + 5.0))
-				- (1.0 / ((8.0 * n) + 6.0)));
+		Pi_f = Pi_f + ((1.0 / pow(16, n_f)) * ((4.0 / ((8.0 * n_f) + 1.0))
+	   				-  (2.0 / ((8.0 * n_f) + 4.0))
+	    			-  (1.0 / ((8.0 * n_f) + 5.0))
+					-  (1.0 / ((8.0 * n_f) + 6.0))));
 
 		kern_readTickCount(&time[1]);
 		delta = (uint32_t)(time[1] - time[0]);
 
-		n = n + 1.0;
+		n_f = n_f + 1.0;
 
-		(void)dprintf(KSTDOUT, "n = %"PRIu32", Pi = %.9f Time = %"PRIu32"\n", (uint32_t)n, Pi, delta);
+		(void)dprintf(KSTDOUT, "n = %"PRIu32", Pi = %.9f Time = %"PRIu32"\n", (uint32_t)n_f, Pi_f, delta);
 	}
 }
 
@@ -200,10 +198,8 @@ static	void	aProcess_0(const void *argument) {
  *
  */
 [[noreturn]]
-static	void	aProcess_1(const void *argument) {
+static	void	aProcess_1([[maybe_unused]] const void *argument) {
 	int32_t		a, b, c, d;
-
-	UNUSED(argument);
 
 	while (true) {
 		kern_suspendProcess(100u);
@@ -234,13 +230,11 @@ static	void	aProcess_1(const void *argument) {
  *
  */
 [[noreturn]]
-static	void	aProcess_2(const void *argument) {
+static	void	aProcess_2([[maybe_unused]] const void *argument) {
 
 // !!! For big strings, consider to use pointers to accomodate them
 
 	char_t	myBigText[] = "P2: The old dreams were good dreams. They didn't work out, but I'm glad I had them.\n";
-
-	UNUSED(argument);
 
 	while (true) {
 		kern_suspendProcess(100u);
@@ -268,9 +262,6 @@ MAIN_ENTRY(argc, argv[]) {
 	STRG_LOC_CONST(aStrText_1[]) = "Process user 1.                           (c) EFr-2026";
 	STRG_LOC_CONST(aStrIden_2[]) = "Process_User_2";
 	STRG_LOC_CONST(aStrText_2[]) = "Process user 2.                           (c) EFr-2026";
-
-	UNUSED(argc);
-	UNUSED(argv);
 
 // Specifications for the processes
 

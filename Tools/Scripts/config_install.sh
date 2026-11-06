@@ -1,9 +1,9 @@
 # config_install.
 # ===============
-
+#
 # SPDX-License-Identifier: MIT
 # SPDX-FileCopyrightText: 2025-2026 Laurent von Allmen
-
+#
 #------------------------------------------------------------------------
 # Author:	Laurent von Allmen	The 2025-01-01
 # Modifs:	Edo. Franzi			The 2025-01-01
@@ -114,38 +114,38 @@ export PATH_SCRIPTS
 # - gmp
 # - mpfr
 
-export BIN_VER=2.46.1
-export GCC_ARM_VER=16.1.0
-export GCC_RVXX_VER=16.1.0
+export BIN_VER=2.47
+export GCC_ARM_VER=16.2.0
+export GCC_RVXX_VER=16.2.0
 export NLB_VER=4.6.0
 export NLB_RVXX_VER=4.5.0
-export GDB_VER=17.2
-export LLVM_ARM_VER=22.1.8
-export LLVM_ARM_COMMIT=7780fd67
-export LLVM_RVXX_VER=22.1.8
-export LLVM_RVXX_COMMIT=e961ff9e
+export GDB_VER=18.1
+export LLVM_ARM_VER=23.1.4
+export LLVM_ARM_COMMIT=de1581b8
+export LLVM_RVXX_VER=23.1.4
+export LLVM_RVXX_COMMIT=36ca223b
 export GMP_VER=6.3.0
 export MPFR_VER=4.2.2
 export OPENOCD_VER=0.12.0
-export D2XX_OSX_VER=1.4.30
+export D2XX_OSX_VER=1.4.36
 export D2XX_LINUX_VER=1.4.34
 export LIBFTDI_VER=1.5
 export LIBUSB_VER=1.0.30
 export LIBCONFUSE_VER=3.3
 export DFUUTIL_VER=1.1
 export LIBJAYLINK_VER=0.4.0
-export DOXYGEN_VER=1.17.0
-export GRAPHVIZ_VER=15.1.0
-export CPPCHECK_VER=2.20.0
-export PICO_SDK_VER=2.3.0
-export PICOTOOL_VER=2.3.0
+export DOXYGEN_VER=1.18.0
+export GRAPHVIZ_VER=16.1.0
+export CPPCHECK_VER=2.22.0
+export PICO_SDK_VER=2.3.1
+export PICOTOOL_VER=2.3.1
 
 # Goodies
 # Not used for the uKOS-X project
 
-export GCC_ARC_VER=16.1.0
-export BOOST_VER=1.91.0
-export IMAGEMAGICK_VER=7.1.2-27
+export GCC_ARC_VER=16.2.0
+export BOOST_VER=1.92.0
+export IMAGEMAGICK_VER=7.1.2-35
 export PK2CMD_VER=1.27.01
 export SDCC_VER=4.6.0
 export SRECORD_VER=1.65

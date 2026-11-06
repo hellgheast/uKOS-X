@@ -1,10 +1,10 @@
 /*
 ; stub_sdcard.
 ; ============
-
+;
 ; SPDX-License-Identifier: MIT
 ; SPDX-FileCopyrightText: 2025-2026 Edo. Franzi
-
+;
 ;------------------------------------------------------------------------
 ; Author:	Edo. Franzi		The 2025-01-01
 ; Modifs:
@@ -58,8 +58,8 @@
 #define	SDMMC_FREQUENCY				KFREQUENCY_PLL1Q
 
 #define	model_sdcard_init			stub_sdcard_init
-#define	model_sdcard_readStatus		stub_sdcard_readStatus
 #define	model_sdcard_initialise		stub_sdcard_initialise
+#define	model_sdcard_isPresent		stub_sdcard_isPresent
 #define	model_sdcard_read			stub_sdcard_read
 #define	model_sdcard_write			stub_sdcard_write
 #define	model_sdcard_ioctl			stub_sdcard_ioctl
@@ -78,9 +78,7 @@ enum {
  *   - Initialise
  *
  */
-static	void	cb_control(uint8_t mode) {
-
-	UNUSED(mode);
+static	void	cb_control([[maybe_unused]] uint8_t mode) {
 
 	RCC->AHB3ENR |= RCC_AHB3ENR_SDMMC1EN;
 }

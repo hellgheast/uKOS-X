@@ -1,10 +1,10 @@
 /*
 ; os_errors.
 ; ==========
-
+;
 ; SPDX-License-Identifier: MIT
 ; SPDX-FileCopyrightText: 2025-2026 Edo. Franzi
-
+;
 ;------------------------------------------------------------------------
 ; Author:	Edo. Franzi		The 2025-01-01
 ; Modifs:
@@ -152,6 +152,7 @@ enum : int32_t {
 	KERR_SERIAL_NOERR = 0,										// No error
 	KERR_SERIAL_SYCNA = (int32_t)(KSERIAL_ERR + 1u),			// System call not available
 	KERR_SERIAL_GEERR,											// General error
+	KERR_SERIAL_NOTCO,											// The device is not connected
 	KERR_SERIAL_NODEV,											// The device does not exist
 	KERR_SERIAL_NOCHA,											// The channel does not exist
 	KERR_SERIAL_CHBSY,											// The manager is busy
@@ -262,7 +263,9 @@ enum : int32_t {
 enum : int32_t {
 	KERR_TEXT_NOERR = 0,										// No error
 	KERR_TEXT_SYCNA = (int32_t)(KTEXT_ERR + 1u),				// System call not available
-	KERR_TEXT_GEERR												// General error
+	KERR_TEXT_GEERR,											// General error
+	KERR_TEXT_TMARG,											// Too many arguments
+	KERR_TEXT_TOLNG												// Source too long for the destination
 };
 
 // calendar manager errors

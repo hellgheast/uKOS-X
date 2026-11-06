@@ -1,10 +1,10 @@
 /*
 ; stub_wfi0_usart1_esp32_wifi_AP.
 ; ===============================
-
+;
 ; SPDX-License-Identifier: MIT
 ; SPDX-FileCopyrightText: 2025-2026 Edo. Franzi
-
+;
 ;------------------------------------------------------------------------
 ; Author:	Edo. Franzi		The 2025-01-01
 ; Modifs:
@@ -65,6 +65,7 @@
 #define	model_usart_write				stub_wfi0_write
 #define	model_usart_read				stub_wfi0_read
 #define	model_usart_flush				stub_wfi0_flush
+#define	model_usart_isConnected			stub_wfi0_isConnected
 
 #define	KUSART_SEMA_RX_S
 #define	KUSART_SEMA_TX_S
@@ -421,9 +422,7 @@ static	void	local_state_EM(uint8_t data) {
  * - Set the flag vReadyToSend
  *
  */
-static	void	local_state_BG(uint8_t data) {
-
-	UNUSED(data);
+static	void	local_state_BG([[maybe_unused]] uint8_t data) {
 
 	vReadyToSend = true;
 	vState = nullptr;

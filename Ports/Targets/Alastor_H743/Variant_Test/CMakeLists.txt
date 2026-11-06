@@ -1,9 +1,9 @@
 # CMakeLists.
 # ===========
-
+#
 # SPDX-License-Identifier: MIT
 # SPDX-FileCopyrightText: 2025-2026 Laurent von Allmen
-
+#
 #------------------------------------------------------------------------
 # Author:	Laurent von Allmen	The 2025-01-01
 # Modifs:
@@ -45,7 +45,7 @@
 #
 #------------------------------------------------------------------------
 
-cmake_minimum_required(VERSION 3.26)
+cmake_minimum_required(VERSION 3.31)
 
 # uKOS-X CMake module setup
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/../../../Mkfiles/cmake")
@@ -170,8 +170,8 @@ add_source_with_define(libx_p ${PATH_OSYS}/Lib_serials/urt0/urt0.c CONFIG_MAN_UR
 add_source_with_define(libx_p ${PATH_OSYS}/Lib_serials/urt1/urt1.c CONFIG_MAN_URT1_S)
 add_source_with_define(libx_p ${PATH_OSYS}/Lib_serials/urt2/urt2.c CONFIG_MAN_URT2_S)
 add_source_with_define(libx_p ${PATH_OSYS}/Lib_serials/urt3/urt3.c CONFIG_MAN_URT3_S)
+add_source_with_define(libx_p ${PATH_OSYS}/Lib_storages/flash/flash.c CONFIG_MAN_FLASH_S)
 add_source_with_define(libx_p ${PATH_OSYS}/Lib_storages/sdcard/sdcard.c CONFIG_MAN_SDCARD_S)
-add_source_with_define(libx_p ${PATH_OSYS}/Lib_storages/serialFlash/serialFlash.c CONFIG_MAN_SERIAL_FLASH_S)
 add_source_with_define(libx_p ${PATH_OSYS}/Lib_storages/storage/storage.c CONFIG_MAN_STORAGE_S)
 target_sources(libx_p PRIVATE
 	${PATH_BASE}/Lib_cryptographics/random/stub_random.c
@@ -189,8 +189,8 @@ target_sources(libx_p PRIVATE
 	${PATH_BASE}/Lib_serials/urt1/stub_urt1_usart3.c
 	${PATH_BASE}/Lib_serials/urt2/stub_urt2_usart1.c
 	${PATH_BASE}/Lib_serials/urt3/stub_urt3_uart4.c
+	${PATH_BASE}/Lib_storages/flash/stub_flash.c
 	${PATH_BASE}/Lib_storages/sdcard/stub_sdcard.c
-	${PATH_BASE}/Lib_storages/serialFlash/stub_serialFlash.c
 	${PATH_VARI}/Lib_peripherals/imager/stub_imager_mt9v03x.c
 	${PATH_VARI}/Lib_peripherals/imu/stub_imu_lsm9ds1.c
 	${PATH_VARI}/Lib_peripherals/temperature/stub_temperature_lsm9ds1.c
@@ -199,7 +199,8 @@ target_link_libraries(libx_p PUBLIC system_compiler_flags)
 
 # Lib_xxxx components (user) -> liblibx_u.a
 add_library(libx_u)
-add_source_with_define(libx_u ${PATH_OSYS}/Lib_generics/newlib/newlib.c CONFIG_MAN_NEWLIB_S)
+# C library integration (newlib, picolibc or llvmlibc, selected by C_LIBRARY)
+add_clib_manager_source(libx_u)
 add_source_with_define(libx_u ${PATH_OSYS}/Lib_generics/text/text.c CONFIG_MAN_TEXT_S)
 add_source_with_define(libx_u ${PATH_OSYS}/Lib_neurals/mlpn/mlpn.c CONFIG_MAN_MLPN_S)
 target_link_libraries(libx_u PUBLIC system_compiler_flags)
@@ -236,6 +237,7 @@ target_link_libraries(proc_u PUBLIC system_compiler_flags)
 # CLI components (user) -> libtool_u.a
 add_library(tool_u)
 target_sources(tool_u PRIVATE
+	${PATH_OSYS}/CLI/X/X.c
 	${PATH_OSYS}/CLI/bangla/BaNgLa.c
 	${PATH_OSYS}/CLI/bench/bench.c
 	${PATH_OSYS}/CLI/bench/bench_00.c
@@ -251,7 +253,6 @@ target_sources(tool_u PRIVATE
 	${PATH_OSYS}/CLI/dumplog/dumplog.c
 	${PATH_OSYS}/CLI/dumptrace/dumptrace.c
 	${PATH_OSYS}/CLI/echo/echo.c
-	${PATH_BASE}/CLI/esp32/esp32.c
 	${PATH_OSYS}/CLI/fill/fill.c
 	${PATH_OSYS}/CLI/gdb/gdb.c
 	${PATH_OSYS}/CLI/hexloader/hexloader.c
@@ -278,9 +279,9 @@ target_sources(tool_u PRIVATE
 	${PATH_OSYS}/CLI/wki2c/wki2c.c
 	${PATH_OSYS}/CLI/wkserial/wkserial.c
 	${PATH_OSYS}/CLI/wkspi/wkspi.c
-	${PATH_OSYS}/CLI/X/X.c
+	${PATH_BASE}/CLI/esp32/esp32.c
 )
-if(DEFINED WITHAPP AND WITHAPP STREQUAL "classPy")
+if(DEFINED WITHAPP AND WITHAPP STREQUAL "class_Py")
     target_sources(tool_u PRIVATE ${PATH_UKOS}/Applications/uKOS_Appls_Downloadable/l_MLPs/class_Py/class_Py.c)
     add_compile_definitions(WITHAPP_S)
 endif()

@@ -1,10 +1,10 @@
 /*
 ; canary.
 ; =======
-
+;
 ; SPDX-License-Identifier: MIT
 ; SPDX-FileCopyrightText: 2025-2026 Edo. Franzi
-
+;
 ;------------------------------------------------------------------------
 ; Author:	Edo. Franzi		The 2025-01-01
 ; Modifs:
@@ -137,9 +137,6 @@ MODULE(
 MAIN_ENTRY(argc, argv[]) {
 				uint32_t	i;
 	volatile	uint32_t	array[KNB_ELEMENTS];
-
-	UNUSED(argc);
-	UNUSED(argv);
 
 // Initialise 0..n-1 elements
 

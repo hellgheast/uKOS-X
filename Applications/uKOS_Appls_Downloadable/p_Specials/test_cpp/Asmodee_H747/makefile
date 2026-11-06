@@ -1,15 +1,15 @@
 # makefile.
 # =========
-
+#
 # SPDX-License-Identifier: MIT
 # SPDX-FileCopyrightText: 2025-2026 Edo. Franzi
-
+#
 #------------------------------------------------------------------------
 # Author:	Edo. Franzi		The 2025-01-01
 # Modifs:
 #
 # Project:	uKOS-X
-# Goal:		makefile for the "test_cc" application.
+# Goal:		makefile for the "test_cpp" application.
 #
 #   (c) 2025-2026, Edo. Franzi
 #   --------------------------
@@ -45,7 +45,7 @@
 #
 #------------------------------------------------------------------------
 
-PROJECT			=  test_cc
+PROJECT			=  test_cpp
 
 # Paths overloaded
 

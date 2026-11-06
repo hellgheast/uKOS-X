@@ -1,10 +1,10 @@
 /*
 ; dumplog.
 ; ========
-
+;
 ; SPDX-License-Identifier: MIT
 ; SPDX-FileCopyrightText: 2025-2026 Edo. Franzi
-
+;
 ;------------------------------------------------------------------------
 ; Author:	Edo. Franzi		The 2025-01-01
 ; Modifs:
@@ -66,7 +66,7 @@ STRG_LOC_CONST(aStrHelp[])		  = "Dump the log buffer\n"
 
 									"Module built on "__DATE__"  "__TIME__" (c) EFr-2026\n\n";
 
-static	int32_t		prgm(uint32_t argc, const char_t *argv[]);
+static	int32_t		prgm([[maybe_unused]] uint32_t argc, [[maybe_unused]] const char_t *argv[]);
 
 MODULE(
 	Dumplog,									// Module name (the first letter has to be upper case)
@@ -99,9 +99,6 @@ static	int32_t	prgm(uint32_t argc, const char_t *argv[]) {
 			recordLogging_t		*logBuffer, *rLogBuffer, *rOldLogBuffer;
 			bool				terminate = false;
 	const	char_t				*category, *idSpacerI, *idSpacerF;
-
-	UNUSED(argc);
-	UNUSED(argv);
 
 	(void)dprintf(KSYST, "Log dump.\n");
 
@@ -262,7 +259,7 @@ static	void	local_compose(const char_t *identifier, const char_t **idSpacer) {
 	size_t	len;
 
 // --------------------------------------|-------------------------------|---
-//                                      "Process_to_count_the_number_xyztu";
+//										"Process_to_count_the_number_xyztu";
 	static	const	char_t	aSpacer[] = "                                 ";
 
 	len = strlen(identifier);

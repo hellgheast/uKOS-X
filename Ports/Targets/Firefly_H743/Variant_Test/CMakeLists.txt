@@ -1,9 +1,9 @@
 # CMakeLists.
 # ===========
-
+#
 # SPDX-License-Identifier: MIT
 # SPDX-FileCopyrightText: 2025-2026 Laurent von Allmen
-
+#
 #------------------------------------------------------------------------
 # Author:	Laurent von Allmen	The 2026-05-15
 # Modifs:
@@ -45,7 +45,7 @@
 #
 #------------------------------------------------------------------------
 
-cmake_minimum_required(VERSION 3.26)
+cmake_minimum_required(VERSION 3.31)
 
 # uKOS-X CMake module setup
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/../../../Mkfiles/cmake")
@@ -80,7 +80,7 @@ file(APPEND "${ARTEFACTS_DIR}/FLASH.cnf" "-DCACHE_D_S ")
 # Customisation of firmware copyright text
 add_compile_definitions(
 	"uKOS_NAME="
-	"uKOS_OWNER=(c) LvA"
+	"uKOS_OWNER=(c) Edo. Franzi"
 )
 
 # Flash programming script selection
@@ -168,8 +168,8 @@ add_source_with_define(libx_p ${PATH_OSYS}/Lib_serials/cdc0/cdc0.c CONFIG_MAN_CD
 add_source_with_define(libx_p ${PATH_OSYS}/Lib_serials/cdc1/cdc1.c CONFIG_MAN_CDC1_S)
 add_source_with_define(libx_p ${PATH_OSYS}/Lib_serials/serial/serial.c CONFIG_MAN_SERIAL_S)
 add_source_with_define(libx_p ${PATH_OSYS}/Lib_serials/urt0/urt0.c CONFIG_MAN_URT0_S)
+add_source_with_define(libx_p ${PATH_OSYS}/Lib_storages/flash/flash.c CONFIG_MAN_FLASH_S)
 add_source_with_define(libx_p ${PATH_OSYS}/Lib_storages/sdcard/sdcard.c CONFIG_MAN_SDCARD_S)
-add_source_with_define(libx_p ${PATH_OSYS}/Lib_storages/serialFlash/serialFlash.c CONFIG_MAN_SERIAL_FLASH_S)
 add_source_with_define(libx_p ${PATH_OSYS}/Lib_storages/storage/storage.c CONFIG_MAN_STORAGE_S)
 target_sources(libx_p PRIVATE
 	${PATH_BASE}/Lib_cryptographics/random/stub_random.c
@@ -180,14 +180,15 @@ target_sources(libx_p PRIVATE
 	${PATH_BASE}/Lib_peripherals/switch/stub_switch.c
 	${PATH_BASE}/Lib_peripherals/watchdog/stub_watchdog.c
 	${PATH_BASE}/Lib_serials/urt0/stub_urt0_usart1.c
+	${PATH_BASE}/Lib_storages/flash/stub_flash.c
 	${PATH_BASE}/Lib_storages/sdcard/stub_sdcard.c
-	${PATH_BASE}/Lib_storages/serialFlash/stub_serialFlash.c
 )
 target_link_libraries(libx_p PUBLIC system_compiler_flags ${TINYUSB})
 
 # Lib_xxxx components (user) -> liblibx_u.a
 add_library(libx_u)
-add_source_with_define(libx_u ${PATH_OSYS}/Lib_generics/newlib/newlib.c CONFIG_MAN_NEWLIB_S)
+# C library integration (newlib, picolibc or llvmlibc, selected by C_LIBRARY)
+add_clib_manager_source(libx_u)
 add_source_with_define(libx_u ${PATH_OSYS}/Lib_generics/text/text.c CONFIG_MAN_TEXT_S)
 add_source_with_define(libx_u ${PATH_OSYS}/Lib_neurals/mlpn/mlpn.c CONFIG_MAN_MLPN_S)
 target_link_libraries(libx_u PUBLIC system_compiler_flags)
@@ -204,20 +205,28 @@ target_link_libraries(proc_p PUBLIC system_compiler_flags)
 # Process components (user) -> libproc_u.a
 add_library(proc_u)
 target_sources(proc_u PRIVATE
+	${PATH_OSYS}/Processes/TinyUSB/TinyUSB.c
 	${PATH_OSYS}/Processes/alive/alive.c
 	${PATH_OSYS}/Processes/getTemp/getTemp.c
 	${PATH_OSYS}/Processes/launcher/launcher.c
 	${PATH_OSYS}/Processes/startUp/startUp.c
-	${PATH_OSYS}/Processes/TinyUSB/TinyUSB.c
-	${PATH_BASE}/Processes/alive/stub_alive.c
 	${PATH_BASE}/Processes/TinyUSB/stub_TinyUSB.c
+	${PATH_BASE}/Processes/alive/stub_alive.c
 	${PATH_VARI}/Processes/startUp/stub_startUp.c
 )
+# Boot banner on the LCD display (requires add_LVGL(), see below)
+target_sources(proc_u PRIVATE
+	${PATH_OSYS}/Processes/splash/splash.c
+	${PATH_OSYS}/Processes/splash/splash_ui.c
+	${PATH_BASE}/Processes/splash/stub_splash.c
+)
+target_include_directories(proc_u PRIVATE ${PATH_OSYS}/Processes/splash)
 target_link_libraries(proc_u PUBLIC system_compiler_flags ${TINYUSB})
 
 # CLI components (user) -> libtool_u.a
 add_library(tool_u)
 target_sources(tool_u PRIVATE
+	${PATH_OSYS}/CLI/X/X.c
 	${PATH_OSYS}/CLI/bangla/BaNgLa.c
 	${PATH_OSYS}/CLI/bench/bench.c
 	${PATH_OSYS}/CLI/bench/bench_00.c
@@ -255,7 +264,6 @@ target_sources(tool_u PRIVATE
 	${PATH_OSYS}/CLI/uKOS/uKOS.c
 	${PATH_OSYS}/CLI/wki2c/wki2c.c
 	${PATH_OSYS}/CLI/wkserial/wkserial.c
-	${PATH_OSYS}/CLI/X/X.c
 )
 target_link_libraries(tool_u PUBLIC system_compiler_flags)
 
@@ -265,6 +273,7 @@ set(UKOS_COMPONENTS rtcb_p kern_p kern_u libx_p libx_u proc_p proc_u tool_u ${TI
 # Optional manager
 add_MicroPython()
 add_LVGL(DISPLAY WKS43WV067_5_Inches)
+target_include_directories(proc_u PRIVATE ${LVGL_INCLUDE_DIRECTORIES})
 add_FatFs(STORAGE sdcard_flash)
 
 # System configuration flags

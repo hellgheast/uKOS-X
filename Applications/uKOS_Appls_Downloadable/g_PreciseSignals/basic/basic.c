@@ -1,10 +1,10 @@
 /*
 ; basic.
 ; ======
-
+;
 ; SPDX-License-Identifier: MIT
 ; SPDX-FileCopyrightText: 2025-2026 Edo. Franzi
-
+;
 ;------------------------------------------------------------------------
 ; Author:	Edo. Franzi		The 2025-01-01
 ; Modifs:
@@ -158,7 +158,6 @@ static	proc_t		*vProcess_0, *vProcess_1;
 static	enum		{ KSTATE1, KSTATE2, KSTATE3, KSTATE4 } vState = KSTATE1;
 
 #define	KSYNC_STATE_MACHINE		(1u<<0u)	// Synchro for the state machine (P1)
-#define	KSYNC_CONTINUOUS		(1u<<1u)	// Synchro for the continuous (P2)
 
 /*
  * \brief aProcess_0
@@ -168,9 +167,7 @@ static	enum		{ KSTATE1, KSTATE2, KSTATE3, KSTATE4 } vState = KSTATE1;
  *
  */
 [[noreturn]]
-static	void	aProcess_0(const void *argument) {
-
-	UNUSED(argument);
+static	void	aProcess_0([[maybe_unused]] const void *argument) {
 
 	while (true) {
 		kern_suspendProcess(500u);
@@ -199,12 +196,10 @@ static	void	aProcess_0(const void *argument) {
  *
  */
 [[noreturn]]
-static	void	aProcess_1(const void *argument) {
+static	void	aProcess_1([[maybe_unused]] const void *argument) {
 	uint32_t	signal;
 	prcs_t		*preciseSignal;
 	sign_t		*sigGroup = nullptr;
-
-	UNUSED(argument);
 
 	if (kern_createPreciseSignal("My_State_Machine", &preciseSignal) != KERR_KERN_NOERR) { LOG(KFATAL_USER, "Create prcs"); exit(EXIT_OS_FAILURE); }
 
@@ -290,9 +285,6 @@ MAIN_ENTRY(argc, argv[]) {
 	STRG_LOC_CONST(aStrText_0[]) = "Process user 0.                           (c) EFr-2026";
 	STRG_LOC_CONST(aStrIden_1[]) = "Process_User_1";
 	STRG_LOC_CONST(aStrText_1[]) = "Process user 1.                           (c) EFr-2026";
-
-	UNUSED(argc);
-	UNUSED(argv);
 
 // Specifications for the processes
 

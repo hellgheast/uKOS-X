@@ -1,10 +1,10 @@
 /*
 ; concurrent.
 ; ===========
-
+;
 ; SPDX-License-Identifier: MIT
 ; SPDX-FileCopyrightText: 2025-2026 Edo. Franzi
-
+;
 ;------------------------------------------------------------------------
 ; Author:	Edo. Franzi		The 2025-01-01
 ; Modifs:
@@ -244,9 +244,6 @@ MAIN_ENTRY(argc, argv[]) {
 	STRG_LOC_CONST(aStrText_3[]) = "Process user 3.                           (c) EFr-2026";
 	STRG_LOC_CONST(aStrText_4[]) = "Process user 4.                           (c) EFr-2026";
 	STRG_LOC_CONST(aStrText_5[]) = "Process user 5.                           (c) EFr-2026";
-
-	UNUSED(argc);
-	UNUSED(argv);
 
 // Specifications for the processes
 

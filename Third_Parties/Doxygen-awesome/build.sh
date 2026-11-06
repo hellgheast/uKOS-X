@@ -1,11 +1,11 @@
 #!/usr/bin/env zsh
-
+#
 # build.
 # ======
-
+#
 # SPDX-License-Identifier: MIT
 # SPDX-FileCopyrightText: 2025-2026 Edo. Franzi
-
+#
 #------------------------------------------------------------------------
 # Author:	Edo. Franzi		The 2025-01-01
 # Modifs:
@@ -76,7 +76,7 @@ printf '%b%s%b' "${GREEN}" "${splash}" "${NC}"
 # Packages
 # --------
 
-readonly package=2.4.2
+readonly package=2.5.0
 
 # Clone the right package
 
